@@ -5,7 +5,6 @@ module SolanaRuby
   class WebsocketClientHelper
     def handle_message(message_data, subscriptions)
       message = JSON.parse(message_data)
-      binding.pry
       if message['method'] == 'subscription'
         subscription_id = message['params']['subscription']
         if subscriptions[subscription_id]

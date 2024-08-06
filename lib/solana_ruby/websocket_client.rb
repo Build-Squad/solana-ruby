@@ -42,7 +42,6 @@ module SolanaRuby
 
     def setup_handlers
       @ws.on :message do |msg|
-        binding.pry
         ws_client_helper = SolanaRuby::WebsocketClientHelper.new
         ws_client_helper.handle_message(msg.data)
       end
@@ -67,19 +66,19 @@ module SolanaRuby
 end
 
 
-client = SolanaRuby::WebsocketClient.new("wss://api.devnet.solana.com")
+# client = SolanaRuby::WebsocketClient.new("wss://api.devnet.solana.com")
 
-account_pubkey = ""
+# account_pubkey = ""
 
-# Subscribe to account updates
-subscription_id = client.subscribe("rootSubscribe") do |message|
-  puts "Received slot update: #{message}"
-end
+# # Subscribe to account updates
+# subscription_id = client.subscribe("rootSubscribe") do |message|
+#   puts "Received slot update: #{message}"
+# end
 
-# Simulate running for a while to receive messages
-sleep(60)
+# # Simulate running for a while to receive messages
+# sleep(60)
 
-# Unsubscribe
-client.unsubscribe("rootUnsubscribe", subscription_id)
+# # Unsubscribe
+# client.unsubscribe("rootUnsubscribe", subscription_id)
 
 
