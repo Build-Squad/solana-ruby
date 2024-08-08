@@ -3,6 +3,7 @@
 require "net/http"
 require "json"
 require "uri"
+require 'pry'
 require_relative "http_methods/basic_methods"
 
 module SolanaRuby

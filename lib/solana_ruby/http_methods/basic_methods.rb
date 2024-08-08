@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
 require 'pry'
+require_relative '../../solana_ruby/exceptions/custom_error'
 
 module SolanaRuby
   module HttpMethods
     module BasicMethods
+      class SolanaError < StandardError; end
 
       def get_balance(pubkey)
         balance_info = request("getBalance", [pubkey])
+        raise SolanaError, balance_info['error']['message'] if balance_info['error']
+
         balance_info["result"]["value"]
       end
 

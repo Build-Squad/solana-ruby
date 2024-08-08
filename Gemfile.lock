@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    solana_ruby (1.0.0)
+    solana_ruby (2.0.0)
       brakeman (~> 6.1.2)
       pry (~> 0.14.2)
       rubycritic (~> 4.9.0)
@@ -26,8 +26,12 @@ GEM
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
     concurrent-ruby (1.3.3)
+    crack (1.0.0)
+      bigdecimal
+      rexml
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
+    diff-lcs (1.5.1)
     docile (1.4.1)
     dry-configurable (1.2.0)
       dry-core (~> 1.0, < 2)
@@ -67,6 +71,7 @@ GEM
       path_expander (~> 1.0)
       ruby_parser (~> 3.1, > 3.1.0)
       sexp_processor (~> 4.8)
+    hashdiff (1.1.1)
     ice_nine (0.11.2)
     json (2.7.2)
     language_server-protocol (3.17.0.3)
@@ -94,6 +99,19 @@ GEM
     regexp_parser (2.9.2)
     rexml (3.3.2)
       strscan
+    rspec (3.13.0)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.0)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.1)
     rubocop (1.65.0)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
@@ -138,6 +156,10 @@ GEM
       axiom-types (~> 0.1)
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
+    webmock (3.23.1)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
     websocket (1.2.11)
     websocket-client-simple (0.8.0)
       event_emitter
@@ -150,8 +172,11 @@ PLATFORMS
 
 DEPENDENCIES
   rake (~> 13.0)
+  rspec
   rubocop (~> 1.21)
+  simplecov
   solana_ruby!
+  webmock
 
 BUNDLED WITH
    2.5.16

@@ -6,7 +6,5 @@ require_relative "solana_ruby/websocket_client"
 # Dir["solana_ruby/*.rb"].each { |f| require_relative f.delete(".rb") }
 
 module SolanaRuby
-  # class Error < StandardError; end
-  class Client < SolanaRuby::HttpClient
-  end
+  class Error < StandardError; end
 end
