@@ -4,20 +4,24 @@ require 'websocket-client-simple'
 require 'securerandom'
 require 'json'
 require 'pry'
+require_relative "Web_socket_handlers"
 
 module SolanaRuby
-  class WebsocketClient
+  class WebSocketClient
+    include WebSocketHandlers
+    attr_reader :subscriptions
+
     def initialize(url)
       @url = url
-      @@subscriptions = {}
+      @subscriptions = {}
       @ws = WebSocket::Client::Simple.connect(@url)
 
-      setup_handlers
+      WebSocketHandlers.setup_handlers(@ws, self)
     end
 
     def subscribe(method, params = nil, &block)
       id = generate_id
-      @@subscriptions[id] = block
+      @subscriptions[id] = block
       message = {
         jsonrpc: '2.0',
         id: id,
@@ -39,34 +43,19 @@ module SolanaRuby
       @ws.send(message.to_json)
     end
 
-    private
-
-    def setup_handlers
-      @ws.on :message do |msg|
-        data = JSON.parse(msg.data)
-        if data['id'] && @@subscriptions[data['id']]
-          @@subscriptions[data['id']].call(data['result'])
-        elsif data['method'] && data['params']
-          @@subscriptions.each do |id, block|
-            block.call(data['params']) if block
-          end
-        else
-          puts "Unhandled message: #{msg.data}"
+    def handle_message(data)
+      if data['id'] && @subscriptions[data['id']]
+        @subscriptions[data['id']].call(data['result'])
+      elsif data['method'] && data['params']
+        @subscriptions.each do |id, block|
+          block.call(data['params']) if block
         end
-      end
-
-      @ws.on :open do
-        puts 'Websocket connection established.'
-      end
-
-      @ws.on :close do |e|
-        puts "Websocket connection closed: #{e.inspect}"
-      end
-
-      @ws.on :error do |e|
-        puts "Error: #{e.inspect}"
+      else
+        puts "Unhandled message: #{data}"
       end
     end
+
+    private
 
     def generate_id
       SecureRandom.uuid
@@ -75,12 +64,12 @@ module SolanaRuby
 end
 
 
-# client = SolanaRuby::WebsocketClient.new("wss://api.devnet.solana.com")
+# client = SolanaRuby::WebSocketClient.new("wss://api.devnet.solana.com")
 
 # account_pubkey = "9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g"
 
 # # Subscribe to account updates
-# subscription_id = client.subscribe("slotSubscribe") do |message|
+# subscription_id = client.subscribe("accountSubscribe", [account_pubkey]) do |message|
 #   puts "The updates is: #{message}"
 # end
 
@@ -88,6 +77,6 @@ end
 # sleep(120)
 
 # # Unsubscribe
-# client.unsubscribe("slotSubscribe", subscription_id)
+# client.unsubscribe("accountSubscribe", subscription_id)
 
 

@@ -1,17 +1,14 @@
 # frozen_string_literal: true
 
 require 'pry'
-require_relative '../../solana_ruby/exceptions/custom_error'
+require 'base58'
 
 module SolanaRuby
   module HttpMethods
     module BasicMethods
-      class SolanaError < StandardError; end
 
       def get_balance(pubkey)
         balance_info = request("getBalance", [pubkey])
-        raise SolanaError, balance_info['error']['message'] if balance_info['error']
-
         balance_info["result"]["value"]
       end
 
@@ -28,6 +25,60 @@ module SolanaRuby
       def get_account_info_and_context(pubkey)
         account_info = request("getAccountInfo", [pubkey])
         account_info["result"]
+      end
+
+      def get_address_lookup_table(pubkey)
+        response = get_account_info_and_context(pubkey)
+
+        # Handle the response to ensure the account is a valid Address Lookup Table
+        if response && response['value']
+          account_data = response['value']['data']
+          
+          # Decode the account data
+          lookup_table_data = decode_lookup_table_data(Base64.decode64(account_data))
+
+          # Return the parsed lookup table details
+          lookup_table_data
+        else
+          raise "Address Lookup Table not found or invalid account data."
+        end
+      end
+
+      private
+
+      def decode_lookup_table_data(data)
+        lookup_table_state = {}
+
+        lookup_table_state[:last_extended_slot], 
+        lookup_table_state[:last_extended_block_height], 
+        deactivation_slot = data[0, 24].unpack("Q<Q<Q<")
+
+        lookup_table_state[:deactivation_slot] = (deactivation_slot == 0xFFFFFFFFFFFFFFFF) ? nil : deactivation_slot
+
+        authority_offset = 24
+        addresses_offset = authority_offset + 32
+
+        authority_key = data[authority_offset, 32]
+        lookup_table_state[:authority] = if authority_key == ("\x00" * 32)
+                                           nil
+                                         else
+                                           Base58.binary_to_base58(authority_key, :bitcoin)
+                                         end
+
+        addresses_data = data[addresses_offset..-1]
+        address_count = addresses_data.size / 32
+        lookup_table_state[:addresses] = address_count.times.map do |i|
+          address_data = addresses_data[i * 32, 32]
+          Base58.binary_to_base58(address_data, :bitcoin)
+        end
+
+        {
+          "lastExtendedSlot" => lookup_table_state[:last_extended_slot],
+          "lastExtendedBlockHeight" => lookup_table_state[:last_extended_block_height],
+          "deactivationSlot" => lookup_table_state[:deactivation_slot] || 18446744073709551615,
+          "addresses" => lookup_table_state[:addresses],
+          "authority" => lookup_table_state[:authority]
+        }
       end
     end
   end
