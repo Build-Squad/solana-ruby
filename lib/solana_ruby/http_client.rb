@@ -5,10 +5,13 @@ require "json"
 require "uri"
 require 'pry'
 require 'base64'
+require 'base58'
 require_relative "http_methods/basic_methods"
 require_relative "http_methods/lookup_table_methods"
 require_relative "http_methods/transaction_methods"
 require_relative "http_methods/signature_methods"
+require_relative "http_methods/blockhash_methods"
+require_relative "http_methods/block_methods"
 require_relative "base_client"
 
 module SolanaRuby
@@ -17,6 +20,8 @@ module SolanaRuby
     include HttpMethods::LookupTableMethods
     include HttpMethods::TransactionMethods
     include HttpMethods::SignatureMethods
+    include HttpMethods::BlockhashMethods
+    include HttpMethods::BlockMethods
     BASE_URL = "https://api.mainnet-beta.solana.com"
 
     def initialize(endpoint = BASE_URL)
@@ -45,7 +50,7 @@ end
 
 # Testing ....
 
-# client = SolanaRuby::HttpClient.new("https://api.devnet.solana.com")
+# client = SolanaRuby::HttpClient.new("http://localhost:8899")
 
 # pubkey = "9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g"
 
@@ -53,6 +58,6 @@ end
 
 # options = { "limit"=> 2 }
 
-# account_info = client.get_signatures_for_address(pubkey, options)
-
+# current_slot = client.get_slot()
+# account_info = client.get_block_signatures(current_slot)
 # puts "The signature status is: #{account_info}"

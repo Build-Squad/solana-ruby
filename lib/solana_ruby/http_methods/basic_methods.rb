@@ -26,6 +26,11 @@ module SolanaRuby
         account_info = request("getAccountInfo", [pubkey])
         account_info["result"]
       end
+
+      def get_slot
+        slot_info = request("getSlot")
+        slot_info['result']
+      end
     end
   end
 end

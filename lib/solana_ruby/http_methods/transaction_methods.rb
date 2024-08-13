@@ -8,8 +8,9 @@ module SolanaRuby
       TIMEOUT = 60 # seconds
       RETRY_INTERVAL = 2 # seconds
 
-      def send_transaction(signed_transaction)
-        result = request('sendTransaction', [signed_transaction])
+      def send_transaction(signed_transaction, options = {})
+        params = [signed_transaction, options]
+        result = request('sendTransaction', params)
         result['result']
       end
 

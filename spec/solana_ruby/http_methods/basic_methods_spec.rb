@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe SolanaRuby::HttpClient do
+RSpec.describe SolanaRuby::HttpClient::BasicMethods do
   let(:url) { 'https://api.devnet.solana.com' }
   let(:client) { SolanaRuby::HttpClient.new(url) }
 
