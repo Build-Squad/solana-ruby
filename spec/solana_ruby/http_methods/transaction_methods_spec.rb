@@ -1,4 +1,4 @@
-require 'webmock/rspec'
+# frozen_string_literal: true
 
 RSpec.describe SolanaRuby::HttpMethods::TransactionMethods do
   let(:url) { "https://api.devnet.solana.com" }

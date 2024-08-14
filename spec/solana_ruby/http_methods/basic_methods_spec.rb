@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe SolanaRuby::HttpClient::BasicMethods do
+RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
   let(:url) { 'https://api.devnet.solana.com' }
   let(:client) { SolanaRuby::HttpClient.new(url) }
 
@@ -152,6 +152,24 @@ RSpec.describe SolanaRuby::HttpClient::BasicMethods do
         expect(response['value']['rentEpoch']).to eq(54534684155455)
         expect(response['value']['lamports']).to eq(1000000)
       end
+    end
+  end
+
+
+  describe '#get_slot' do
+    let(:response_body) do
+      { jsonrpc: '2.0', result: 12345, id: 1}.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(body: hash_including(method: 'getSlot'))
+        .to_return(status: 200, body: response_body, headers: { 'Content-Type' => 'application/json' })
+    end
+
+    it 'returns the current and available slot' do
+      response = client.get_slot()
+      expect(response).to eq(12345)
     end
   end
 end
