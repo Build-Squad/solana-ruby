@@ -3,6 +3,7 @@
 module SolanaRuby
   module HttpMethods
     module BlockMethods
+      DEFAULT_OPTIONS = { maxSupportedTransactionVersion: 0 }
 
       def get_blocks(start_slot, end_slot)
         params = [start_slot, end_slot]
@@ -10,15 +11,14 @@ module SolanaRuby
         block_info['result']
       end
 
-      def get_block(slot, options = {})
+      def get_block(slot, options = DEFAULT_OPTIONS)
         params = [slot, options]
         block_info = request('getBlock', params)
         block_info['result']
       end
 
       def get_block_production
-        block_info = request('getBlockProduction')
-        block_info['result']
+        request('getBlockProduction')
       end
 
       def get_block_time(slot)
@@ -26,7 +26,7 @@ module SolanaRuby
         block_info['result']
       end
 
-      def get_block_signatures(slot, options = {})
+      def get_block_signatures(slot, options = DEFAULT_OPTIONS)
         block_info = get_block(slot, options)
         block_signatures(block_info)
       end
@@ -36,15 +36,25 @@ module SolanaRuby
         cluster_nodes_info['result']
       end
 
-      def get_confirmed_block(slot, options = {})
-        params = [slot, options]
-        block_info = request('getConfirmedBlock', params)
-        block_info["result"]
+      def get_confirmed_block(slot, options = DEFAULT_OPTIONS)
+        block_info = get_block(slot, options)
+        block_info['result']
       end
 
       def get_confirmed_block_signatures(slot)
         block_info = get_confirmed_block(slot)
         block_signatures(block_info)
+      end
+
+      def get_parsed_block(slot, options = {})
+        params = [slot, { encoding: 'jsonParsed', transactionDetails: 'full' }.merge(options)]
+        result = request('getBlock', params)
+        result['result']
+      end
+
+      def get_first_available_block
+        result = request('getFirstAvailableBlock')
+        result['result']
       end
 
       private

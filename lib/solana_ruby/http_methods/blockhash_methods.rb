@@ -14,10 +14,16 @@ module SolanaRuby
         recent_blockhash_info['result']
       end
 
-      def get_fee_calculator_for_blockhash(block_hash, options = { commitment: 'finalized' })
-        params = [block_hash, options]
-        free_calculator_for_blockhash_info = request('getFeeCalculatorForBlockhash', params)
-        free_calculator_for_blockhash_info['result']
+      def get_fee_for_message(blockhash, options = { commitment: 'processed' })
+        params = [blockhash, options]
+        fee_for_blockhash_info = request('getFeeForMessage', params)
+        fee_for_blockhash_info['result']
+      end
+
+      def is_blockhash_valid?(blockhash, options = { commitment: 'processed' })
+        params = [blockhash, options]
+        blockhash_info = request('isBlockhashValid', params)
+        blockhash_info['result']['value']
       end
     end
   end

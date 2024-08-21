@@ -30,7 +30,7 @@ module SolanaRuby
 
     def request(method, params = [])
       http = Net::HTTP.new(@uri.host, @uri.port)
-      # http.use_ssl = true
+      http.use_ssl = true
 
       request = Net::HTTP::Post.new(@uri.request_uri, {'Content-Type' => 'application/json'})
       request.body = {
@@ -50,7 +50,7 @@ end
 
 # Testing ....
 
-# client = SolanaRuby::HttpClient.new("http://localhost:8899")
+# client = SolanaRuby::HttpClient.new("https://api.devnet.solana.com")
 
 # pubkey = "9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g"
 
@@ -59,5 +59,7 @@ end
 # options = { "limit"=> 2 }
 
 # current_slot = client.get_slot()
-# account_info = client.get_block_signatures(current_slot)
-# puts "The signature status is: #{account_info}"
+# p "current_slot: ====: #{JSON.parse(current_slot)["blockhash"]}"
+# get_block_info = client.get_first_available_block()
+# puts "The get_block_info is: #{get_block_info}"
+
