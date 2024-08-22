@@ -31,6 +31,31 @@ module SolanaRuby
         slot_info = request('getSlot')
         slot_info['result']
       end
+
+      def get_epoch_info(options = { commitment: 'finalized' })
+        epoch_info = request('getEpochInfo', [options])
+        epoch_info['result']
+      end
+
+      def get_epoch_schedule
+        epoch_schedule = request('getEpochSchedule')
+        epoch_schedule['result']
+      end
+
+      def get_genesis_hash
+        genesis_hash = request('getGenesisHash')
+        genesis_hash['result']
+      end
+
+      def get_inflation_governor
+        inflation_governor = request('getInflationGovernor')
+        inflation_governor['result']
+      end
+
+      def get_inflation_rate
+        inflation_rate = request('getInflationRate')
+        inflation_rate['result']
+      end
     end
   end
 end

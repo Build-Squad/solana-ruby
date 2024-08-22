@@ -314,4 +314,86 @@ RSpec.describe SolanaRuby::HttpMethods::BlockMethods do
       end
     end
   end
+
+  describe '#get_parsed_block' do
+    let(:url) { 'https://api.devnet.solana.com' }
+    let(:client) { SolanaRuby::HttpClient.new(url) }
+    let(:block_number) { 123456 }
+    let(:parsed_block_response) do
+      {
+        "jsonrpc" => "2.0",
+        "result" => {
+          "blockTime" => 1628777860,
+          "blockHeight" => block_number,
+          "transactions" => [
+            {
+              "transaction" => {
+                "message" => {
+                  "accountKeys" => [
+                    "Account1",
+                    "Account2"
+                  ],
+                  "instructions" => [
+                    {
+                      "programIdIndex" => 1,
+                      "accounts" => [0, 1]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "id" => 1
+      }
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: { jsonrpc: '2.0', id: 1, method: 'getBlock', params: [block_number, { encoding: 'jsonParsed', transactionDetails: 'full' }] }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(
+          status: 200,
+          body: parsed_block_response.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+  
+    it 'returns the parsed block details' do
+      result = client.get_parsed_block(block_number)
+      expect(result).to eq(parsed_block_response['result'])
+    end
+  end
+
+  describe '#get_first_available_block' do
+    let(:url) { 'https://api.devnet.solana.com' }
+    let(:client) { SolanaRuby::HttpClient.new(url) }
+    let(:first_available_block_response) do
+      {
+        "jsonrpc" => "2.0",
+        "result" => 12345,
+        "id" => 1
+      }
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: { jsonrpc: '2.0', id: 1, method: 'getFirstAvailableBlock', params: [] }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(
+          status: 200,
+          body: first_available_block_response.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+  
+    it 'returns the first available block number' do
+      result = client.get_first_available_block
+      expect(result).to eq(first_available_block_response['result'])
+    end
+  end
 end

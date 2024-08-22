@@ -172,4 +172,37 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
       expect(response).to eq(12345)
     end
   end
+
+  describe '#get_epoch_info' do
+    before do
+      stub_request(:post, url)
+        .with(
+          body: { 
+            jsonrpc: '2.0', 
+            id: 1, 
+            method: 'getEpochInfo', 
+            params: [{ 'commitment' => 'finalized' }]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: {
+          jsonrpc: "2.0",
+          result: {
+            epoch: 205,
+            slotIndex: 12345,
+            slotsInEpoch: 432000,
+            absoluteSlot: 885431,
+            blockHeight: 12345678,
+            transactionCount: 2345678
+          },
+          id: 1
+        }.to_json)
+    end
+
+    it 'retrieves the current epoch info similarly to Web3.js' do
+      response = client.get_epoch_info
+      expect(response['epoch']).to eq(205)
+      expect(response['slotIndex']).to eq(12345)
+    end
+  end
 end
