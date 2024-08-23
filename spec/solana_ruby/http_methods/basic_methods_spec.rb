@@ -205,4 +205,187 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
       expect(response['slotIndex']).to eq(12345)
     end
   end
+
+  describe '#get_epoch_schedule' do
+    before do
+      stub_request(:post, url)
+        .with(
+          body: { jsonrpc: '2.0', id: 1, method: 'getEpochSchedule', params: [] }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(
+          status: 200,
+          body: {
+            jsonrpc: '2.0',
+            result: {
+              firstNormalEpoch: 8,
+              firstNormalSlot: 8160,
+              leaderScheduleSlotOffset: 8192,
+              slotsPerEpoch: 8192,
+              warmup: true
+            },
+            id: 1
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+
+    it 'returns the epoch schedule data' do
+      result = client.get_epoch_schedule
+      expect(result).to eq({
+        "firstNormalEpoch"=> 8,
+        "firstNormalSlot"=> 8160,
+        "leaderScheduleSlotOffset"=> 8192,
+        "slotsPerEpoch"=> 8192,
+        "warmup"=> true
+      })
+    end
+
+    context 'handles errors gracefully' do
+      before do
+        stub_request(:post, url)
+          .with(
+            body: {
+              jsonrpc: "2.0",
+              id: 1,
+              method: "getEpochSchedule",
+              params: []
+            }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 500, body: { error: 'Internal Server Error' }.to_json)
+      end
+
+      it 'raises an error' do
+        expect { client.get_epoch_schedule() }.to raise_error(StandardError)
+      end
+    end
+  end
+
+  describe '#get_genesis_hash' do
+    before do
+      stub_request(:post, url)
+        .with(
+          body: { jsonrpc: '2.0', id: 1, method: 'getGenesisHash', params: [] }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(
+          status: 200,
+          body: { result: '2T4oJrW8b5u8qf8BHEj9fp8cV9Tf5XEB5TtZ2xqMiMJo' }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+
+    it 'returns the genesis hash' do
+      result = client.get_genesis_hash
+      expect(result).to eq('2T4oJrW8b5u8qf8BHEj9fp8cV9Tf5XEB5TtZ2xqMiMJo')
+    end
+
+    context 'handles errors gracefully' do
+      before do
+        stub_request(:post, url)
+          .with(
+            body:{ jsonrpc: '2.0', id: 1, method: 'getGenesisHash', params: [] }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 500, body: { error: 'Internal Server Error' }.to_json)
+      end
+
+      it 'raises an error' do
+        expect { client.get_genesis_hash() }.to raise_error(StandardError)
+      end
+    end
+  end
+
+  describe '#get_inflation_governor' do
+    before do
+      stub_request(:post, url)
+        .with(
+          body: { jsonrpc: '2.0', id: 1, method: 'getInflationGovernor', params: [] }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(
+          status: 200,
+          body: {
+            jsonrpc: '2.0',
+            result: {
+              foundation: 0.05,
+              foundationTerm: 7,
+              initial: 0.15,
+              taper: 0.15,
+              terminal: 0.015
+            },
+            id: 1
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+
+    it 'returns the inflation governor info' do
+      result = client.get_inflation_governor
+      expect(result['foundation']).to eq(0.05)
+      expect(result['initial']).to eq(0.15)
+      expect(result['terminal']).to eq(0.015)
+    end
+  end
+
+  describe '#get_inflation_rate' do
+    before do
+      stub_request(:post, url)
+        .with(
+          body: { jsonrpc: '2.0', id: 1, method: 'getInflationRate', params: [] }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(
+          status: 200,
+          body: { result: { epoch: 0.02, foundation: 0.01, total: 0.15, validator: 0.01 } }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+
+  
+    it 'returns the inflation rate data' do
+      result = client.get_inflation_rate
+      expect(result).to eq({
+        "epoch"=> 0.02,
+        "foundation"=> 0.01,
+        "total"=> 0.15,
+        "validator"=> 0.01
+      })
+    end
+  end
+
+  describe '#get_inflation_reward' do
+    let(:addresses) { ['6dmNQ5jwLeLk5REvio1JcMshcbvkYMwy26sJ8pbkvStu', 'BGsqMegLpV6n6Ve146sSX2dTjUMj3M92HnU8BbNRMhF2'] }
+    before do
+      stub_request(:post, url)
+        .with(
+          body: { jsonrpc: '2.0', id: 1, method: 'getInflationReward', params: [addresses, { epoch: 2 }] }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(
+          status: 200,
+          body: {
+            jsonrpc: '2.0',
+            result: [
+              {
+                amount: 2500,
+                effectiveSlot: 224,
+                epoch: 2,
+                postBalance: 499999442500
+              },
+              nil
+            ],
+            id: 1
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+    end
+ 
+    it 'returns the inflation reward data' do
+      response = client.get_inflation_reward(addresses, { epoch: 2 })
+      expect(response['result'][0]['amount']).to eq(2500)
+      expect(response['result'][0]['effectiveSlot']).to eq(224)
+    end
+  end
 end

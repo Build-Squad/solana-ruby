@@ -36,6 +36,26 @@ module SolanaRuby
           sleep(RETRY_INTERVAL)
         end
       end
+
+      def get_transaction(signature, options = {})
+        params = [signature, options]
+        response = request('getTransaction', params)
+        response['result']
+      end
+
+      def get_transaction_count(options = { commitment: 'finalized' })
+        result = request('getTransactionCount', [options])
+        result['result']
+      end
+
+      def get_transactions(signatures, options = { commitment: 'finalized' })
+        transactions = []
+        signatures.each do |signature|
+          transaction = get_transaction(signature, options)
+          transactions << transaction
+        end
+        transactions
+      end
     end
   end
 end

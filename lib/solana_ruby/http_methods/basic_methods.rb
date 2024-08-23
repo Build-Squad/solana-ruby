@@ -56,6 +56,11 @@ module SolanaRuby
         inflation_rate = request('getInflationRate')
         inflation_rate['result']
       end
+
+      def get_inflation_reward(addresses, options = {})
+        params = [addresses, options]
+        request('getInflationReward', params)
+      end
     end
   end
 end
