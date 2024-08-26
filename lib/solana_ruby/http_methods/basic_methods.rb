@@ -17,16 +17,6 @@ module SolanaRuby
         balance_info['result']
       end
 
-      def get_account_info(pubkey)
-        account_info = request('getAccountInfo', [pubkey])
-        account_info['result']['value']
-      end
-
-      def get_account_info_and_context(pubkey)
-        account_info = request('getAccountInfo', [pubkey])
-        account_info['result']
-      end
-
       def get_slot
         slot_info = request('getSlot')
         slot_info['result']

@@ -10,7 +10,8 @@ module SolanaRuby
       end
 
       def get_signature_status(signature, options = {})
-        get_signature_statuses([signature], options)
+        signature_status = get_signature_statuses([signature], options)
+        signature_status['value'].first
       end
 
       def get_signatures_for_address(address, options = {})

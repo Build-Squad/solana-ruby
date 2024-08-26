@@ -5,6 +5,9 @@ SimpleCov.start
 
 require 'rspec'
 require 'webmock/rspec'
+require 'base58'
+require 'base64'
+require 'json'
 require_relative "../lib/solana_ruby/base_client"
 require_relative '../lib/solana_ruby/http_client'
 require_relative '../lib/solana_ruby/http_methods/basic_methods'
