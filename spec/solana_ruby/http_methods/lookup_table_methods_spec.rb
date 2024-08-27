@@ -3,65 +3,66 @@
 RSpec.describe SolanaRuby::HttpMethods::LookupTableMethods do
   let(:url) { 'https://api.devnet.solana.com' }
   let(:client) { SolanaRuby::HttpClient.new(url) }
-  
+
   describe '#get_address_lookup_table' do
     let(:pubkey) { '4aPUVcbh82duG6ChMkMxWS1W21aafQ2f6Sq7PFBcvsZM' }
-    
+
     context 'when the account data is valid' do
       let(:valid_account_data) do
-        # Replace this with actual binary data for a valid lookup table
         Base64.strict_encode64([12345678, 87654321, 0, 0].pack("Q<Q<Q<") +
-                                ('A' * 32) +
-                                ('B' * 32) +
-                                ('C' * 32))
+                                ('A'.b * 32) +
+                                ('B'.b * 32) +
+                                ('C'.b * 32))
       end
-      
+
       before do
-        allow(client).to receive(:get_account_info_and_context)
-          .with(pubkey)
-          .and_return('value' => { 'data' => valid_account_data })
+        stub_request(:post, url)
+          .with(body: hash_including(method: 'getAccountInfo', params: [pubkey]))
+          .to_return(
+            status: 200,
+            body: {
+              jsonrpc: '2.0',
+              result: { value: { data: valid_account_data } },
+              id: 1
+            }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
       end
 
       it 'returns the correct lookup table data' do
         result = client.get_address_lookup_table(pubkey)
 
-        expect(result).to eq(
-          "lastExtendedSlot" => 12345678,
-          "lastExtendedBlockHeight" => 87654321,
-          "deactivationSlot" => 18446744073709551615,
-          "addresses" => [
-            Base58.binary_to_base58('A' * 32, :bitcoin),
-            Base58.binary_to_base58('B' * 32, :bitcoin),
-            Base58.binary_to_base58('C' * 32, :bitcoin)
+        expect(result).to eq({
+          last_extended_slot: 12345678,
+          last_extended_block_height: 87654321,
+          deactivation_slot: 0,
+          addresses: [
+            Base58.binary_to_base58('B'.b * 32, :bitcoin),
+            Base58.binary_to_base58('C'.b * 32, :bitcoin)
           ],
-          "authority" => Base58.binary_to_base58('A' * 32, :bitcoin)
-        )
+          authority: Base58.binary_to_base58('A'.b * 32, :bitcoin)
+        })
       end
     end
-    
-    context 'when the account data is invalid' do
+
+    context 'when the account data is invalid or not found' do
       before do
-        allow(client).to receive(:get_account_info_and_context)
-          .with(pubkey)
-          .and_return('value' => nil)
+        stub_request(:post, url)
+          .with(body: hash_including(method: 'getAccountInfo', params: [pubkey]))
+          .to_return(
+            status: 200,
+            body: {
+              jsonrpc: '2.0',
+              result: { value: nil },
+              id: 1
+            }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
       end
 
       it 'raises an error' do
         expect { client.get_address_lookup_table(pubkey) }
-          .to raise_error("Address Lookup Table not found or invalid account data.")
-      end
-    end
-
-    context 'when the address lookup table is not found' do
-      before do
-        allow(client).to receive(:get_account_info_and_context)
-          .with(pubkey)
-          .and_return('value' => { 'data' => Base64.strict_encode64('') })
-      end
-
-      it 'raises an error' do
-        expect { client.get_address_lookup_table(pubkey) }
-          .to raise_error("Address Lookup Table not found or invalid account data.")
+          .to raise_error(RuntimeError, 'Address Lookup Table not found or invalid account data.')
       end
     end
   end

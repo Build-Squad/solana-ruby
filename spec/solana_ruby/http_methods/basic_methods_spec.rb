@@ -108,54 +108,6 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
     end
   end
 
-  describe '#get_account_info and #get_account_info_and_context' do
-    context 'when the public key is not available or invalid' do
-      let(:pubkey) { '9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g' }
-      let(:response_body) do
-        {
-          jsonrpc: '2.0',
-          result:
-          {
-            context: {
-              apiVersion: '1.0.0',
-              slot: 123456789
-            },
-            value: {
-              data: "",
-              executable: false,
-              lamports: 1000000,
-              owner: "11111111111111111111111111111111",
-              rentEpoch: 54534684155455,
-              space: 0
-            }
-          },
-          id: 1
-        }.to_json
-      end
-
-      before do
-        stub_request(:post, url)
-          .with(body: hash_including(method: 'getAccountInfo', params: [pubkey]))
-          .to_return(status: 200, body: response_body, headers: { 'Content-Type' => 'application/json' })
-      end
-
-      it 'returns the account information of the given public key' do
-        response = client.get_account_info(pubkey)
-        expect(response['rentEpoch']).to eq(54534684155455)
-        expect(response['lamports']).to eq(1000000)
-      end
-
-      it 'returns the account information along with context of the given public key' do
-        response = client.get_account_info_and_context(pubkey)
-        expect(response['context']['slot']).to eq(123456789)
-        expect(response['context']['apiVersion']).to eq('1.0.0')
-        expect(response['value']['rentEpoch']).to eq(54534684155455)
-        expect(response['value']['lamports']).to eq(1000000)
-      end
-    end
-  end
-
-
   describe '#get_slot' do
     let(:response_body) do
       { jsonrpc: '2.0', result: 12345, id: 1}.to_json

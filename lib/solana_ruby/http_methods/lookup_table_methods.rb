@@ -19,7 +19,7 @@ module SolanaRuby
           # Return the parsed lookup table details
           lookup_table_data
         else
-          raise "Address Lookup Table not found or invalid account data."
+          raise 'Address Lookup Table not found or invalid account data.'
         end
       end
 
@@ -50,14 +50,8 @@ module SolanaRuby
           address_data = addresses_data[i * 32, 32]
           Base58.binary_to_base58(address_data, :bitcoin)
         end
-
-        {
-          "lastExtendedSlot" => lookup_table_state[:last_extended_slot],
-          "lastExtendedBlockHeight" => lookup_table_state[:last_extended_block_height],
-          "deactivationSlot" => lookup_table_state[:deactivation_slot] || 18446744073709551615,
-          "addresses" => lookup_table_state[:addresses],
-          "authority" => lookup_table_state[:authority]
-        }
+        
+        lookup_table_state
       end
     end
   end
