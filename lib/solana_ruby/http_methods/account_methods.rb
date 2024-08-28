@@ -41,13 +41,7 @@ module SolanaRuby
         account_info['result']
       end
 
-      def get_program_accounts(program_id, options = FINALIZED)
-        params = [program_id, options]
-        account_info = request('getProgramAccounts', params)
-        account_info['result']
-      end
-
-      def get_program_accounts(program_id, options = FINALIZED)
+      def get_program_accounts(program_id, options = FINALIZED_OPTIONS)
         params = [program_id, options]
         account_info = request('getProgramAccounts', params)
         account_info['result']

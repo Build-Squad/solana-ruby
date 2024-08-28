@@ -17,7 +17,7 @@ RSpec.describe SolanaRuby::HttpMethods::LookupTableMethods do
 
       before do
         stub_request(:post, url)
-          .with(body: hash_including(method: 'getAccountInfo', params: [pubkey]))
+          .with(body: hash_including(method: 'getAccountInfo', params: [pubkey, {}]))
           .to_return(
             status: 200,
             body: {
@@ -48,7 +48,7 @@ RSpec.describe SolanaRuby::HttpMethods::LookupTableMethods do
     context 'when the account data is invalid or not found' do
       before do
         stub_request(:post, url)
-          .with(body: hash_including(method: 'getAccountInfo', params: [pubkey]))
+          .with(body: hash_including(method: 'getAccountInfo', params: [pubkey, {}]))
           .to_return(
             status: 200,
             body: {
@@ -62,7 +62,7 @@ RSpec.describe SolanaRuby::HttpMethods::LookupTableMethods do
 
       it 'raises an error' do
         expect { client.get_address_lookup_table(pubkey) }
-          .to raise_error(RuntimeError, 'Address Lookup Table not found or invalid account data.')
+          .to raise_error(SolanaRuby::SolanaError, 'Address Lookup Table not found or invalid account data.')
       end
     end
   end

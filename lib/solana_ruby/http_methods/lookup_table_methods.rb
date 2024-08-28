@@ -19,7 +19,7 @@ module SolanaRuby
           # Return the parsed lookup table details
           lookup_table_data
         else
-          raise 'Address Lookup Table not found or invalid account data.'
+          raise SolanaError.new('Address Lookup Table not found or invalid account data.')
         end
       end
 

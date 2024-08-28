@@ -71,7 +71,7 @@ RSpec.describe SolanaRuby::HttpMethods::TransactionMethods do
       it 'handles the error and raises an appropriate exception' do
         expect {
           client.confirm_transaction(signature)
-        }.to raise_error(RuntimeError, /An unexpected error occurred/)
+        }.to raise_error(SolanaRuby::SolanaError, /An unexpected error occurred/)
       end
     end
   end

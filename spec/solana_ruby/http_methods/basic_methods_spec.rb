@@ -50,8 +50,8 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
           .to_return(status: 200, body: error_response_body, headers: { 'Content-Type' => 'application/json' })
       end
 
-      it 'raises a RuntimeError with the error message' do
-        expect { client.get_balance(invalid_pubkey) }.to raise_error(RuntimeError, 'An unexpected error occurred: API Error: -32602 - Invalid params: Invalid')
+      it 'raises a SolanaError with the error message' do
+        expect { client.get_balance(invalid_pubkey) }.to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: API Error: -32602 - Invalid params: Invalid')
       end
     end
 
@@ -74,8 +74,8 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
           .to_return(status: 200, body: error_response_body, headers: { 'Content-Type' => 'application/json' })
       end
 
-      it 'raises a RuntimeError with the wrongsize error message' do
-        expect { client.get_balance(invalid_pubkey) }.to raise_error(RuntimeError, 'An unexpected error occurred: API Error: -32602 - Invalid params: WrongSize')
+      it 'raises a SolanaError with the wrongsize error message' do
+        expect { client.get_balance(invalid_pubkey) }.to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: API Error: -32602 - Invalid params: WrongSize')
       end
     end
   end

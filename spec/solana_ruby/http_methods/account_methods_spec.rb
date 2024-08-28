@@ -93,46 +93,57 @@ RSpec.describe SolanaRuby::HttpMethods::AccountMethods do
     end
   end
 
-  describe '#get_multiple_account_info' do
+  describe '#get_multiple_account_info#get_multiple_account_info_and_context#get_multiple_parsed_accounts' do
     let(:pubkeys) { ['ArBN2sDgpqjWEmr2Vk5WUHTC3SmusWYzMCTaA9rZ6itT', 'Ap4BqwYoXUD6JpjyPAiXX3JFX2FtBVBkpPFJGKQAyNX5'] }
     let(:options) { { encoding: 'base58' } }
     let(:valid_response) do
       {
-        "jsonrpc" => "2.0",
-        "result" => {
-          "context" => { "slot" => 100 },
-          "value" => [
+        jsonrpc: '2.0',
+        result: {
+          context: { slot: 100 },
+          value: [
             {
-              "pubkey" => pubkeys[0],
-              "account" => {
-                "data" => {
-                  "parsed" => {
-                    "info" => { "tokenAmount" => { "amount" => "5000" } },
-                    "type" => "account"
+              pubkey: pubkeys[0],
+              account: {
+                data: {
+                  parsed: {
+                    info: { tokenAmount: { amount: '5000' } },
+                    type: 'account'
                   },
-                  "lamports" => 2039280,
-                  "owner" => "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                  "rentEpoch" => 234
+                  lamports: 2039280,
+                  owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+                  rentEpoch: 234
                 }
               }
             },
             {
-              "pubkey" => pubkeys[1],
-              "account" => {
-                "data" => {
-                  "parsed" => {
-                    "info" => { "tokenAmount" => { "amount" => "10000" } },
-                    "type" => "account"
+              pubkey: pubkeys[1],
+              account: {
+                data: {
+                  parsed: {
+                    info: { tokenAmount: { amount: '10000' } },
+                    type: 'account'
                   },
-                  "lamports" => 3058290,
-                  "owner" => "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                  "rentEpoch" => 234
+                  lamports: 3058290,
+                  owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+                  rentEpoch: 234
                 }
               }
             }
           ]
         },
-        "id" => 1
+        id: 1
+      }.to_json
+    end
+
+    let(:error_response_body) do
+      {
+        jsonrpc: '2.0',
+        error: {
+          code: 500,
+          message: 'Internal server error'
+        },
+        id: 1
       }.to_json
     end
 
@@ -140,7 +151,7 @@ RSpec.describe SolanaRuby::HttpMethods::AccountMethods do
       stub_request(:post, url)
         .with(
           body: {
-            jsonrpc: "2.0",
+            jsonrpc: '2.0',
             id: 1,
             method: 'getMultipleAccounts',
             params: [pubkeys, options]
@@ -158,25 +169,179 @@ RSpec.describe SolanaRuby::HttpMethods::AccountMethods do
       expect(result.last['account']['data']['parsed']['info']['tokenAmount']['amount']).to eq('10000')
     end
 
+    it 'returns information for multiple accounts along with context info' do
+      result = client.get_multiple_account_info_and_context(pubkeys, options)
+
+      expect(result['context']['slot']).to eq(100)
+      expect(result['value'].size).to eq(2)
+      expect(result['value'].last['pubkey']).to eq(pubkeys[1])
+      expect(result['value'].last['account']['data']['lamports']).to eq(3058290)
+      expect(result['value'].last['account']['data']['rentEpoch']).to eq(234)
+      expect(result['value'].last['account']['data']['owner']).to eq('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
+    end
+
+    context 'when the get_multiple_parsed_accounts is called'  do
+      before do
+        stub_request(:post, url)
+          .with(
+            body: {
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'getMultipleAccounts',
+              params: [pubkeys, { encoding: 'jsonParsed', commitment: 'finalized' }]
+            }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: valid_response)
+      end
+
+      it 'returns json parsed information for multiple accounts' do
+        result = client.get_multiple_parsed_accounts(pubkeys, options)
+
+        expect(result['context']['slot']).to eq(100)
+        expect(result['value'].size).to eq(2)
+        expect(result['value'].last['pubkey']).to eq(pubkeys[1])
+        expect(result['value'].last['account']['data']['lamports']).to eq(3058290)
+        expect(result['value'].last['account']['data']['rentEpoch']).to eq(234)
+        expect(result['value'].last['account']['data']['owner']).to eq('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
+      end
+    end
+
     context 'when an error occurs' do
       before do
         stub_request(:post, url)
           .with(
             body: {
-              jsonrpc: "2.0",
+              jsonrpc: '2.0',
               id: 1,
               method: 'getMultipleAccounts',
               params: [pubkeys, options]
             }.to_json,
             headers: { 'Content-Type' => 'application/json' }
           )
-          .to_return(status: 500, body: { error: { message: 'Internal server error' } }.to_json)
+          .to_return(status: 500, body: error_response_body)
       end
 
       it 'raises an error' do
         expect { client.get_multiple_account_info(pubkeys, options) }
-          .to raise_error(RuntimeError, "An unexpected error occurred: HTTP Error: 500 -")
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: HTTP Error: 500 - Internal server error')
       end
+    end
+  end
+
+  describe '#get_largest_accounts' do
+    before do
+      @successful_response = {
+        result: [
+          { pubkey: 'Account1', lamports: 1_000_000_000 },
+          { pubkey: 'Account2', lamports: 500_000_000 }
+        ]
+      }
+      
+      # Define a failed response body
+      @failed_response = { 'error' => { 'code' => -32602, 'message' => 'Invalid params' } }
+      @options = { encoding: 'base58', commitment: 'finalized' }
+    end
+
+    it 'returns largest accounts when the request is successful' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getLargestAccounts', params: [@options] }.to_json)
+        .to_return(status: 200, body: @successful_response.to_json, headers: { 'Content-Type' => 'application/json' })
+
+      response = client.get_largest_accounts
+      expect(response).to be_an(Array)
+      expect(response.first).to have_key('pubkey')
+      expect(response.first).to have_key('lamports')
+    end
+
+    it 'raises an error when the request fails' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getLargestAccounts', params: [@options] }.to_json)
+        .to_return(status: 400, body: @failed_response.to_json, headers: { 'Content-Type' => 'application/json' })
+
+      expect { client.get_largest_accounts }.to raise_error(SolanaRuby::SolanaError, /Invalid params/)
+    end
+
+    it 'raises an error for invalid JSON response' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getLargestAccounts', params: [@options] }.to_json)
+        .to_return(status: 200, body: 'invalid json', headers: { 'Content-Type' => 'application/json' })
+
+      expect { client.get_largest_accounts }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response/)
+    end
+
+    it 'handles timeout errors gracefully' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getLargestAccounts', params: [@options] }.to_json)
+        .to_timeout
+
+      expect { client.get_largest_accounts }.to raise_error(SolanaRuby::SolanaError, /Request timed out/)
+    end
+
+    it 'handles connection errors gracefully' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getLargestAccounts', params: [@options] }.to_json)
+        .to_raise(SocketError)
+
+      expect { client.get_largest_accounts }.to raise_error(SolanaRuby::SolanaError, /Failed to connect to the server/)
+    end
+  end
+
+  describe '#get_program_accounts' do
+    before do
+      @successful_response = {
+        result: [
+          { account: { data: '3EdTv9xm4GHGr4UFE', executable: true, lamports: 1, owner: 'NativeLoader1111111111111111111111111111111', rentEpoch: 18446744073709551615, space: 12 }, pubkey: 'Vote111111111111111111111111111111111111111' },
+          { account: { data: '25tu17Wz9P3BLFnPuJbEereG', executable: true, lamports: 1, owner: 'NativeLoader1111111111111111111111111111111', rentEpoch: 18446744073709551615, space: 17}, pubkey: 'KeccakSecp256k11111111111111111111111111111' }
+        ]
+      }
+
+      @failed_response = { error: { code: -32602, message: 'Invalid params' } }
+      @options = { commitment: 'finalized' }
+    end
+
+    it 'returns program accounts when the request is successful' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getProgramAccounts', params: ['ProgramId', @options] }.to_json)
+        .to_return(status: 200, body: @successful_response.to_json, headers: { 'Content-Type' => 'application/json' })
+
+      response = client.get_program_accounts('ProgramId')
+      expect(response).to be_an(Array)
+      expect(response.first).to have_key('pubkey')
+      expect(response.first['account']).to have_key('lamports')
+      expect(response.first['account']).to have_key('data')
+    end
+
+    it 'raises an error when the request fails' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getProgramAccounts', params: ['ProgramId', @options] }.to_json)
+        .to_return(status: 400, body: @failed_response.to_json, headers: { 'Content-Type' => 'application/json' })
+
+      expect { client.get_program_accounts('ProgramId') }.to raise_error(SolanaRuby::SolanaError, /Invalid params/)
+    end
+
+    it 'raises an error for invalid JSON response' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getProgramAccounts', params: ['ProgramId', @options] }.to_json)
+        .to_return(status: 200, body: 'invalid json', headers: { 'Content-Type' => 'application/json' })
+
+      expect { client.get_program_accounts('ProgramId') }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response/)
+    end
+
+    it 'handles timeout errors gracefully' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getProgramAccounts', params: ['ProgramId', @options] }.to_json)
+        .to_timeout
+
+      expect { client.get_program_accounts('ProgramId') }.to raise_error(SolanaRuby::SolanaError, /Request timed out/)
+    end
+
+    it 'handles connection errors gracefully' do
+      stub_request(:post, url)
+        .with(body: { jsonrpc: '2.0', id: 1, method: 'getProgramAccounts', params: ['ProgramId', @options] }.to_json)
+        .to_raise(SocketError)
+
+      expect { client.get_program_accounts('ProgramId') }.to raise_error(SolanaRuby::SolanaError, /Failed to connect to the server/)
     end
   end
 end
