@@ -58,7 +58,8 @@ module SolanaRuby
 
       def get_parsed_token_accounts_by_owner(owner_pubkey, filters = {}, options = ENCODING_JSON_OPTIONS)
         params = [owner_pubkey, filters, options]
-        request('getTokenAccountsByOwner', params)
+        parsed_token_accounts = request('getTokenAccountsByOwner', params)
+        parsed_token_accounts['result']
       end
     end
   end
