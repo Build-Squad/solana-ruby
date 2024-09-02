@@ -78,6 +78,21 @@ module SolanaRuby
         max_shred_insert_slot = request('getMaxShredInsertSlot')
         max_shred_insert_slot['result']
       end
+
+      def get_stake_activation(account_pubkey, options = FINALIZED_OPTIONS.merge(epoch: nil))
+        stake_activation = request('getStakeActivation')
+        stake_activation['result']
+      end
+
+      def get_stake_minimum_delegation(options = FINALIZED_OPTIONS)
+        stake_minimum_delagation = request('getStakeMinimumDelegation', [FINALIZED_OPTIONS])
+        stake_minimum_delagation['result']
+      end
+
+      def get_supply(options = FINALIZED_OPTIONS)
+        supply_info = request('getSupply', [options])
+        supply_info['result']
+      end
     end
   end
 end

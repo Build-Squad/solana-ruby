@@ -340,4 +340,444 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
       expect(response['result'][0]['effectiveSlot']).to eq(224)
     end
   end
+
+  describe '#get_leader_schedule' do
+    let(:request_body) do
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getLeaderSchedule',
+        params: [{ epoch: nil }]
+      }
+    end
+
+    context 'when the request is successful' do
+      let(:response_body) do
+        {
+          jsonrpc: '2.0',
+          result: {
+            '1': ['validator1', 'validator2'],
+            '2': ['validator3', 'validator4']
+          },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: response_body, headers: {})
+      end
+
+      it 'returns the leader schedule' do
+        result = client.get_leader_schedule
+        expect(result).to eq({
+          "1" => ["validator1", "validator2"],
+          "2" => ["validator3", "validator4"]
+        })
+      end
+    end
+
+    context 'when the API returns an error' do
+      let(:error_response_body) do
+        {
+          jsonrpc: '2.0',
+          error: { code: -32600, message: 'Invalid Request' },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: error_response_body, headers: {})
+      end
+
+      it 'raises a SolanaError with the correct message' do
+        expect { client.get_leader_schedule }.to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: API Error: -32600 - Invalid Request')
+      end
+    end
+
+    context 'when there is a network error' do
+      before do
+        stub_request(:post, url)
+          .to_raise(SocketError.new('Failed to connect'))
+      end
+
+      it 'raises a SolanaError with a connection failure message' do
+        expect { client.get_leader_schedule }.to raise_error(SolanaRuby::SolanaError, 'Failed to connect to the server')
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises a SolanaError with an invalid JSON message' do
+        expect { client.get_leader_schedule }.to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: Invalid JSON response: Invalid JSON')
+      end
+    end
+  end
+
+  describe '#get_minimum_balance_for_rent_exemption' do
+    let(:data_size) { 1234 }
+    let(:options) { { commitment: 'finalized' } }
+    let(:request_body) do
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getMinimumBalanceForRentExemption',
+        params: [data_size, options]
+      }
+    end
+
+    context 'when the request is successful' do
+      let(:response_body) do
+        {
+          jsonrpc: '2.0',
+          result: 2039280,
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: response_body, headers: {})
+      end
+
+      it 'returns the minimum balance for rent exemption' do
+        result = client.get_minimum_balance_for_rent_exemption(data_size)
+        expect(result).to eq(2039280)
+      end
+    end
+
+    context 'when the API returns an error' do
+      let(:error_response_body) do
+        {
+          jsonrpc: '2.0',
+          error: { code: -32600, message: 'Invalid Request' },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: error_response_body, headers: {})
+      end
+
+      it 'raises a SolanaError with the correct message' do
+        expect { client.get_minimum_balance_for_rent_exemption(data_size) }
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: API Error: -32600 - Invalid Request')
+      end
+    end
+
+    context 'when there is a network error' do
+      before do
+        stub_request(:post, url)
+          .to_raise(SocketError.new('Failed to connect'))
+      end
+
+      it 'raises a SolanaError with a connection failure message' do
+        expect { client.get_minimum_balance_for_rent_exemption(data_size) }
+          .to raise_error(SolanaRuby::SolanaError, 'Failed to connect to the server')
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises a SolanaError with an invalid JSON message' do
+        expect { client.get_minimum_balance_for_rent_exemption(data_size) }
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: Invalid JSON response: Invalid JSON')
+      end
+    end
+  end
+  
+  describe '#get_minimum_ledger_slot' do
+    let(:request_body) do
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'minimumLedgerSlot',
+        params: []
+      }
+    end
+
+    context 'when the request is successful' do
+      let(:response_body) do
+        {
+          jsonrpc: '2.0',
+          result: 123456,
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: response_body, headers: {})
+      end
+
+      it 'returns the minimum ledger slot' do
+        result = client.get_minimum_ladger_slot()
+        expect(result).to eq(123456)
+      end
+    end
+
+    context 'when the API returns an error' do
+      let(:error_response_body) do
+        {
+          jsonrpc: '2.0',
+          error: { code: -32600, message: 'Invalid Request' },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: error_response_body, headers: {})
+      end
+
+      it 'raises a SolanaError with the correct message' do
+        expect { client.get_minimum_ladger_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: API Error: -32600 - Invalid Request')
+      end
+    end
+
+    context 'when there is a network error' do
+      before do
+        stub_request(:post, url)
+          .to_raise(SocketError.new('Failed to connect'))
+      end
+
+      it 'raises a SolanaError with a connection failure message' do
+        expect { client.get_minimum_ladger_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'Failed to connect to the server')
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises a SolanaError with an invalid JSON message' do
+        expect { client.get_minimum_ladger_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: Invalid JSON response: Invalid JSON')
+      end
+    end
+  end
+
+  describe '#get_max_retransmit_slot' do
+    let(:request_body) do
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getMaxRetransmitSlot',
+        params: []
+      }
+    end
+
+    context 'when the request is successful' do
+      let(:response_body) do
+        {
+          jsonrpc: '2.0',
+          result: 123456,
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: response_body, headers: {})
+      end
+
+      it 'returns the maximum retransmit slot' do
+        result = client.get_max_retransmit_slot()
+        expect(result).to eq(123456)
+      end
+    end
+
+    context 'when the API returns an error' do
+      let(:error_response_body) do
+        {
+          jsonrpc: '2.0',
+          error: { code: -32600, message: 'Invalid Request' },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: error_response_body, headers: {})
+      end
+
+      it 'raises a SolanaError with the correct message' do
+        expect { client.get_max_retransmit_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: API Error: -32600 - Invalid Request')
+      end
+    end
+
+    context 'when there is a network error' do
+      before do
+        stub_request(:post, url)
+          .to_raise(SocketError.new('Failed to connect'))
+      end
+
+      it 'raises a SolanaError with a connection failure message' do
+        expect { client.get_max_retransmit_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'Failed to connect to the server')
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises a SolanaError with an invalid JSON message' do
+        expect { client.get_max_retransmit_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: Invalid JSON response: Invalid JSON')
+      end
+    end
+  end
+
+  describe '#get_max_shred_insert_slot' do
+    let(:request_body) do
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getMaxShredInsertSlot',
+        params: []
+      }
+    end
+
+    context 'when the request is successful' do
+      let(:response_body) do
+        {
+          jsonrpc: '2.0',
+          result: 123456,
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: response_body, headers: {})
+      end
+
+      it 'returns the maximum shred insert slot' do
+        result = client.get_max_shred_insert_slot()
+        expect(result).to eq(123456)
+      end
+    end
+
+    context 'when the API returns an error' do
+      let(:error_response_body) do
+        {
+          jsonrpc: '2.0',
+          error: { code: -32600, message: 'Invalid Request' },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: error_response_body, headers: {})
+      end
+
+      it 'raises a SolanaError with the correct message' do
+        expect { client.get_max_shred_insert_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: API Error: -32600 - Invalid Request')
+      end
+    end
+
+    context 'when there is a network error' do
+      before do
+        stub_request(:post, url)
+          .to_raise(SocketError.new('Failed to connect'))
+      end
+
+      it 'raises a SolanaError with a connection failure message' do
+        expect { client.get_max_shred_insert_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'Failed to connect to the server')
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .with(
+            body: request_body.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises a SolanaError with an invalid JSON message' do
+        expect { client.get_max_shred_insert_slot() }
+          .to raise_error(SolanaRuby::SolanaError, 'An unexpected error occurred: Invalid JSON response: Invalid JSON')
+      end
+    end
+  end
 end
