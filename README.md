@@ -1,6 +1,6 @@
 # SolanaRuby
 
-`SolanaRuby` is a lightweight Ruby client for interacting with the Solana blockchain through its JSON-RPC API. It allows developers to perform various queries on the Solana network such as fetching token balances, supply, and more.
+`SolanaRuby` is a lightweight Ruby client for interacting with the Solana blockchain through its JSON-RPC API. It allows developers to perform various queries on the Solana network such as fetching solana balance, acccount information, and more.
 
 TODO: Delete this and the text above, and describe your gem
 
@@ -24,7 +24,7 @@ Or install it yourself as:
 
     require 'solana_ruby'
 
-# Initialize the client (defaults to Mainnet)
+### Initialize the client (defaults to Mainnet)
 
 By default, the client uses the Solana Mainnet RPC URL. You can initialize the client like this:
 
@@ -34,9 +34,9 @@ If you want to use a different Solana network (e.g., Devnet or Testnet), you can
 
     client = SolanaRuby::HttpClient.new("https://api.devnet.solana.com")
 
-# For Example
+### For Example
 
-# Fetch Solana Account Balance
+### Fetch Solana Account Balance
 
 Once the client is initialized, you can make API calls to the Solana network. For example, to get the token supply of a given account:
 
