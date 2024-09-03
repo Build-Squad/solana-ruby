@@ -7,7 +7,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'solana_ruby'
+gem 'solana_ruby', github: 'Build-Squad/solana-ruby', branch: 'main'
 ```
 
 And then execute:
@@ -16,7 +16,8 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install solana_ruby
+    $ gem install specific_install
+    $ gem specific_install https://github.com/Build-Squad/solana-ruby.git
 
 ## Usage
 
