@@ -12,6 +12,8 @@ require_relative "http_methods/transaction_methods"
 require_relative "http_methods/signature_methods"
 require_relative "http_methods/blockhash_methods"
 require_relative "http_methods/block_methods"
+require_relative "http_methods/account_methods"
+require_relative "http_methods/token_methods"
 require_relative "base_client"
 
 module SolanaRuby
@@ -22,6 +24,8 @@ module SolanaRuby
     include HttpMethods::SignatureMethods
     include HttpMethods::BlockhashMethods
     include HttpMethods::BlockMethods
+    include HttpMethods::AccountMethods
+    include HttpMethods::TokenMethods
     BASE_URL = "https://api.mainnet-beta.solana.com"
 
     def initialize(endpoint = BASE_URL)
@@ -48,18 +52,5 @@ module SolanaRuby
   end
 end
 
-# Testing ....
 
-# client = SolanaRuby::HttpClient.new("https://api.devnet.solana.com")
-
-# pubkey = "9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g"
-
-# signatures = "267iujSpqG933rm4UkkF8gv4W8cASfawqRGaudMXtoX8WcSzSNXtfTk2dNjrsTnhQsYU8Q1F1fceDQmLeDEFKySs"
-
-# options = { "limit"=> 2 }
-
-# current_slot = client.get_slot()
-# p "current_slot: ====: #{JSON.parse(current_slot)["blockhash"]}"
-# get_block_info = client.get_first_available_block()
-# puts "The get_block_info is: #{get_block_info}"
 
