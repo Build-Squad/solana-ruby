@@ -30,8 +30,6 @@ To start using the Solana RPC client, initialize it with or without the RPC URL.
     # Optionally, provide a custom RPC URL
     # client = SolanaRuby::HttpClient.new("https://api.devnet.solana.com")
 
-## For Example
-
 ### Fetch Solana Account Balance
 
 Once the client is initialized, you can make API calls to the Solana network. For example, to get the solana balance of a given account:
@@ -64,14 +62,19 @@ Once the client is initialized, you can make API calls to the Solana network. Fo
 The options parameter is a hash that can include the following fields:
 
 commitment: Specifies the level of commitment desired when querying state.
+
 Options include:
+
     'finalized': Query the most recent block confirmed by supermajority of the cluster.
     'confirmed': Query the most recent block that has been voted on by supermajority of the cluster.
     'processed': Query the most recent block regardless of cluster voting.
+
 encoding: Defines the format of the returned account data. Possible values include:
+
     'jsonParsed': Returns data in a JSON-parsed format.
     'base64': Returns raw account data in Base64 encoding.
     'base64+zstd': Returns compressed Base64 data.
+
 By providing options, you can control the nature of the returned data and the reliability of the query.
 
 ## Available Methods
