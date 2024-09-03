@@ -93,6 +93,16 @@ module SolanaRuby
         supply_info = request('getSupply', [options])
         supply_info['result']
       end
+
+      def get_version
+        version_info = request('getVersion')
+        version_info['result']
+      end
+
+      def get_total_supply(options = FINALIZED_OPTIONS)
+        supply_info = get_supply(options)
+        supply_info['value']['total']
+      end
     end
   end
 end

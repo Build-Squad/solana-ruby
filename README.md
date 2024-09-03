@@ -24,7 +24,7 @@ To start using the Solana RPC client, initialize it with or without the RPC URL.
 
     require 'solana_ruby'
 
-    # Initialize the client (defaults to Mainnet)
+    # Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
     client = SolanaRuby::HttpClient.new()
 
     # Optionally, provide a custom RPC URL
@@ -77,6 +77,20 @@ encoding: Defines the format of the returned account data. Possible values inclu
 
 By providing options, you can control the nature of the returned data and the reliability of the query.
 
+### Filters Parameter
+
+The filters parameter allows you to specify conditions for querying token accounts. Some common filter types include:
+
+    # Mint Filter: Filter by a specific token mint. This retrieves accounts holding tokens of that mint.
+    filters = { mint: 'TokenMintPublicKey' }
+
+    # Program Filter: Filter by a specific program (e.g., the token program).
+    filters = { programId: 'TokenProgramPublicKey' }
+
+## Default Options
+
+Several methods have optional parameters where default options are defined in the client. These options can be customized or overridden when calling the methods, but if left unspecified, the client will use its internal defaults.
+
 ## Available Methods
 
 The following methods are supported by the SolanaRuby::HttpClient:
@@ -92,9 +106,9 @@ The following methods are supported by the SolanaRuby::HttpClient:
     get_inflation_rate()
     get_inflation_reward(addresses, options)
     get_leader_schedule(options)
-    get_minimum_ladger_slot
-    get_max_retransmit_slot
-    get_max_shred_insert_slot
+    get_minimum_ladger_slot()
+    get_max_retransmit_slot()
+    get_max_shred_insert_slot()
     get_stake_activation(account_pubkey, options)
     get_account_info(pubkey)
     get_parsed_account_info(pubkey, options)
