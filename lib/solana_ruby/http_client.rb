@@ -52,5 +52,3 @@ module SolanaRuby
   end
 end
 
-
-
