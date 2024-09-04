@@ -14,6 +14,7 @@ require_relative "http_methods/blockhash_methods"
 require_relative "http_methods/block_methods"
 require_relative "http_methods/account_methods"
 require_relative "http_methods/token_methods"
+require_relative "http_methods/slot_methods"
 require_relative "base_client"
 
 module SolanaRuby
@@ -26,6 +27,7 @@ module SolanaRuby
     include HttpMethods::BlockMethods
     include HttpMethods::AccountMethods
     include HttpMethods::TokenMethods
+    include HttpMethods::SlotMethods
     BASE_URL = "https://api.mainnet-beta.solana.com"
 
     def initialize(endpoint = BASE_URL)
@@ -51,4 +53,3 @@ module SolanaRuby
     end
   end
 end
-

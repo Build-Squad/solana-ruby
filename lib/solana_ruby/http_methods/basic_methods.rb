@@ -18,11 +18,6 @@ module SolanaRuby
         balance_info['result']
       end
 
-      def get_slot
-        slot_info = request('getSlot')
-        slot_info['result']
-      end
-
       def get_epoch_info(options = FINALIZED_OPTIONS)
         epoch_info = request('getEpochInfo', [options])
         epoch_info['result']
@@ -64,21 +59,6 @@ module SolanaRuby
         minimum_balance_for_rent_exemption['result']
       end
 
-      def get_minimum_ladger_slot
-        minimum_ladger_slot = request('minimumLedgerSlot')
-        minimum_ladger_slot['result']
-      end
-
-      def get_max_retransmit_slot
-        max_retransmit_slot = request('getMaxRetransmitSlot')
-        max_retransmit_slot['result']
-      end
-
-      def get_max_shred_insert_slot
-        max_shred_insert_slot = request('getMaxShredInsertSlot')
-        max_shred_insert_slot['result']
-      end
-
       def get_stake_activation(account_pubkey, options = FINALIZED_OPTIONS.merge(epoch: nil))
         stake_activation = request('getStakeActivation')
         stake_activation['result']
@@ -102,6 +82,16 @@ module SolanaRuby
       def get_total_supply(options = FINALIZED_OPTIONS)
         supply_info = get_supply(options)
         supply_info['value']['total']
+      end
+
+      def get_health
+        health_info = request('getHealth')
+        health_info['result']
+      end
+
+      def get_identity
+        health_info = request('getIdentity')
+        health_info['result']
       end
     end
   end

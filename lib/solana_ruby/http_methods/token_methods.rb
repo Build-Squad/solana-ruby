@@ -8,8 +8,8 @@ module SolanaRuby
     module TokenMethods
       FINALIZED_OPTIONS = { commitment: 'finalized' }.freeze
 
-      def get_token_balance(pubkey)
-        balance_info = request('getTokenAccountBalance', [pubkey])
+      def get_token_balance(pubkey, options = FINALIZED_OPTIONS)
+        balance_info = request('getTokenAccountBalance', [pubkey, options])
         balance_info['result']['value']
       end
 
