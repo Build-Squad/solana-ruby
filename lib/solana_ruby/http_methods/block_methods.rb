@@ -57,6 +57,12 @@ module SolanaRuby
         result['result']
       end
 
+      def get_blocks_with_limit(start_slot, limit)
+        params = [start_slot, limit]
+        response = request('getBlocksWithLimit', params)
+        response['result']
+      end
+
       private
 
       def block_signatures(block_info)

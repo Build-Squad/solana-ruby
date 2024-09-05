@@ -61,6 +61,38 @@ module SolanaRuby
         parsed_token_accounts = request('getTokenAccountsByOwner', params)
         parsed_token_accounts['result']
       end
+
+      def get_nonce_and_context(pubkey)
+        account_info_and_context = get_account_info_and_context(pubkey)
+        if account_info_and_context['value']['owner'] == '11111111111111111111111111111111' # Nonce program ID
+          data = account_info_and_context['value']['data'][0]
+          if data.nil? || data.empty?
+            raise 'Nonce account data is empty'
+          end
+          decoded_data = Base64.decode64(data)
+          nonce_info = parse_nonce_account(decoded_data)
+          {
+            context: account_info_and_context['context'],
+            value: nonce_info
+          }
+        else
+          raise 'Provided account is not a nonce account'
+        end
+      end
+
+      def get_nonce(pubkey)
+        nonce_info = get_nonce_and_context(pubkey)
+        nonce_info[:value]
+      end
+
+      private
+
+      def parse_nonce_account(data)
+        {
+          blockhash: data[4, 32].unpack1('H*'),
+          fee_calculator: { lamports_per_signature: data[36, 8].unpack1('Q<') }
+        }
+      end
     end
   end
 end

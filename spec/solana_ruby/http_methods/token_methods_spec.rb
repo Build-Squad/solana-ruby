@@ -252,4 +252,78 @@ RSpec.describe SolanaRuby::HttpMethods::TokenMethods do
       end
     end
   end
+
+  describe '#get_token_largest_accounts' do
+    let(:mint_address) { '8686VsjTBhDGJ45y8g9RrZjJLiWUUNLLUV8AwAManq95' }
+    let(:response_body) do
+      {
+        "jsonrpc" => "2.0",
+        "result" => {
+          "value" => [
+            {
+              "address" => "AccountPubkey1",
+              "lamports" => 1000000
+            },
+            {
+              "address" => "AccountPubkey2",
+              "lamports" => 500000
+            }
+          ]
+        },
+        "id" => 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: "2.0",
+            id: 1,
+            method: "getTokenLargestAccounts",
+            params: [mint_address, {}]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns the largest token accounts' do
+      result = client.get_token_largest_accounts(mint_address)
+      expect(result).to eq({
+        "value" => [
+          {
+            "address" => "AccountPubkey1",
+            "lamports" => 1000000
+          },
+          {
+            "address" => "AccountPubkey2",
+            "lamports" => 500000
+          }
+        ]
+      })
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 500, body: { "jsonrpc" => "2.0", "error" => { "code" => -32000, "message" => "Server error" } }.to_json, headers: {})
+      end
+
+      it 'raises an API error' do
+        expect { client.get_token_largest_accounts(mint_address) }.to raise_error(SolanaRuby::SolanaError, /HTTP Error: 500 - Server error/)
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: "Invalid JSON", headers: {})
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_token_largest_accounts(mint_address) }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response: Invalid JSON/)
+      end
+    end
+  end
 end

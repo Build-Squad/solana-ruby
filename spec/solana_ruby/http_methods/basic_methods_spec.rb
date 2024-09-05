@@ -780,4 +780,180 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
       end
     end
   end
+
+  describe '#get_stake_activation' do
+    let(:account_pubkey) { 'Pubkey1234567890abcdef' }
+    let(:options) { { commitment: 'finalized', epoch: nil } }
+    let(:response_body) do
+      {
+        jsonrpc: '2.0',
+        result: {
+          activation: 1000,
+          deactivation: 2000,
+          status: 'active'
+        },
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getStakeActivation',
+            params: [account_pubkey, options]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns the stake activation information' do
+      result = client.get_stake_activation(account_pubkey, options)
+      expect(result).to eq({
+        'activation' => 1000,
+        'deactivation' => 2000,
+        'status' => 'active'
+      })
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 500, body: { jsonrpc: '2.0', error: { code: -32000, message: 'Server error' } }.to_json, headers: {})
+      end
+
+      it 'raises an API error' do
+        expect { client.get_stake_activation(account_pubkey, options) }.to raise_error(SolanaRuby::SolanaError, /HTTP Error: 500 - Server error/)
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_stake_activation(account_pubkey, options) }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response: Invalid JSON/)
+      end
+    end
+  end
+
+  describe '#get_supply' do
+    let(:options) { { commitment: 'finalized' } }
+    let(:response_body) do
+      {
+        jsonrpc: '2.0',
+        result: {
+          total: 1234567890,
+          circulating: 1234560000
+        },
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: "2.0",
+            id: 1,
+            method: 'getSupply',
+            params: [options]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns the supply information' do
+      result = client.get_supply()
+      expect(result).to eq({
+        'total' => 1234567890,
+        'circulating' => 1234560000
+      })
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: { jsonrpc: '2.0', error: { code: -32000, message: 'Server error' } }.to_json, headers: {})
+      end
+
+      it 'raises an API error' do
+        expect { client.get_supply() }.to raise_error(SolanaRuby::SolanaError, /API Error: -32000 - Server error/)
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: "Invalid JSON", headers: {})
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_supply() }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response: Invalid JSON/)
+      end
+    end
+  end
+
+  describe '#get_version' do
+    let(:response_body) do
+      {
+        jsonrpc: '2.0',
+        result: {
+          'solana-core': '1.9.10',
+          version: '1.9.10'
+        },
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getVersion',
+            params: []
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns the version information' do
+      result = client.get_version
+      expect(result).to eq({
+        'solana-core' => '1.9.10',
+        'version' => '1.9.10'
+      })
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: { jsonrpc: '2.0', error: { code: -32000, message: 'Server error' } }.to_json, headers: {})
+      end
+
+      it 'raises an API error' do
+        expect { client.get_version }.to raise_error(SolanaRuby::SolanaError, /API Error: -32000 - Server error/)
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_version }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response: Invalid JSON/)
+      end
+    end
+  end
 end

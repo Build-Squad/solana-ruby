@@ -60,7 +60,8 @@ module SolanaRuby
       end
 
       def get_stake_activation(account_pubkey, options = FINALIZED_OPTIONS.merge(epoch: nil))
-        stake_activation = request('getStakeActivation')
+        params = [account_pubkey, options]
+        stake_activation = request('getStakeActivation', params)
         stake_activation['result']
       end
 
@@ -92,6 +93,16 @@ module SolanaRuby
       def get_identity
         health_info = request('getIdentity')
         health_info['result']
+      end
+
+      def get_recent_performance_samples(limit = 10)
+        performance_samples = request('getRecentPerformanceSamples', [limit])
+        performance_samples['result']
+      end
+
+      def get_recent_prioritization_fees(addresses)
+        params = [addresses]
+        prioritization_fees = request('getRecentPrioritizationFees', params)
       end
     end
   end
