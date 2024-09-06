@@ -63,6 +63,16 @@ module SolanaRuby
         response['result']
       end
 
+      def get_block_height
+        block_height = request('getBlockHeight')
+        block_height['result']
+      end
+
+      def get_block_commitment(block_slot)
+        block_commitment = request('getBlockCommitment', [block_slot])
+        block_commitment['result']
+      end
+
       private
 
       def block_signatures(block_info)

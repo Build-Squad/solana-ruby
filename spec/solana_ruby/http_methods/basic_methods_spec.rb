@@ -956,4 +956,317 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
       end
     end
   end
+
+  describe '#get_total_supply' do
+    let(:response_body) do
+      {
+        jsonrpc: '2.0',
+        result: {
+          value: {
+            total: 1_000_000_000
+          }
+        },
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getSupply',
+            params: [{ commitment: 'finalized' }]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns the total supply' do
+      result = client.get_total_supply
+      expect(result).to eq(1_000_000_000)
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: {
+              jsonrpc: '2.0',
+              error: { code: -32000, message: 'Server error' }
+            }.to_json,
+            headers: {}
+          )
+      end
+
+      it 'raises an API error' do
+        expect { client.get_total_supply }.to raise_error(
+          SolanaRuby::SolanaError,
+          /API Error: -32000 - Server error/
+        )
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: 'Invalid JSON',
+            headers: {}
+          )
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_total_supply }.to raise_error(
+          SolanaRuby::SolanaError,
+          /Invalid JSON response: Invalid JSON/
+        )
+      end
+    end
+  end
+
+  describe '#get_health' do
+    let(:response_body) do
+      {
+        jsonrpc: '2.0',
+        result: 'ok',  # Example response for a healthy state
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getHealth',
+            params: []
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns the health status' do
+      result = client.get_health
+      expect(result).to eq('ok')  # Expecting 'ok' as a sample healthy response
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: {
+              jsonrpc: '2.0',
+              error: { code: -32000, message: 'Server error' }
+            }.to_json,
+            headers: {}
+          )
+      end
+
+      it 'raises an API error' do
+        expect { client.get_health }.to raise_error(
+          SolanaRuby::SolanaError,
+          /API Error: -32000 - Server error/
+        )
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: 'Invalid JSON',
+            headers: {}
+          )
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_health }.to raise_error(
+          SolanaRuby::SolanaError,
+          /Invalid JSON response: Invalid JSON/
+        )
+      end
+    end
+  end
+
+  describe '#get_identity' do
+    let(:response_body) do
+      {
+        jsonrpc: '2.0',
+        result: 'Solana Identity',  # Example identity response
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getIdentity',
+            params: []
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns the identity information' do
+      result = client.get_identity
+      expect(result).to eq('Solana Identity')  # Expecting a sample identity response
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: {
+              jsonrpc: '2.0',
+              error: { code: -32000, message: 'Server error' }
+            }.to_json,
+            headers: {}
+          )
+      end
+
+      it 'raises an API error' do
+        expect { client.get_identity }.to raise_error(
+          SolanaRuby::SolanaError,
+          /API Error: -32000 - Server error/
+        )
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: 'Invalid JSON',
+            headers: {}
+          )
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_identity }.to raise_error(
+          SolanaRuby::SolanaError,
+          /Invalid JSON response: Invalid JSON/
+        )
+      end
+    end
+  end
+
+  describe '#get_recent_performance_samples' do
+    let(:response_body) do
+      {
+        jsonrpc: '2.0',
+        result: [
+          { sample_1: 'data_1' }, 
+          { sample_2: 'data_2' }
+        ],
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getRecentPerformanceSamples',
+            params: [10]  # Default limit
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns recent performance samples' do
+      result = client.get_recent_performance_samples
+      expect(result).to eq([
+        { 'sample_1' => 'data_1' }, 
+        { 'sample_2' => 'data_2' }
+      ])
+    end
+
+    context 'when a limit is specified' do
+      let(:response_body_with_limit) do
+        {
+          jsonrpc: '2.0',
+          result: [
+            { 'sample_1' => 'data_1' }
+          ],
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: {
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'getRecentPerformanceSamples',
+              params: [5]  # Custom limit
+            }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+          )
+          .to_return(status: 200, body: response_body_with_limit, headers: {})
+      end
+
+      it 'returns recent performance samples with the specified limit' do
+        result = client.get_recent_performance_samples(5)
+        expect(result).to eq([{ 'sample_1' => 'data_1' }])
+      end
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: {
+              jsonrpc: '2.0',
+              error: { code: -32000, message: 'Server error' }
+            }.to_json,
+            headers: {}
+          )
+      end
+
+      it 'raises an API error' do
+        expect { client.get_recent_performance_samples }.to raise_error(
+          SolanaRuby::SolanaError,
+          /API Error: -32000 - Server error/
+        )
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: 'Invalid JSON',
+            headers: {}
+          )
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_recent_performance_samples }.to raise_error(
+          SolanaRuby::SolanaError,
+          /Invalid JSON response: Invalid JSON/
+        )
+      end
+    end
+  end
 end

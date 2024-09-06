@@ -55,6 +55,12 @@ module SolanaRuby
         end
         transactions
       end
+
+      def request_airdrop(pubkey, lamports, options = FINALIZED_OPTIONS)
+        params = [pubkey, lamports, options]
+        response = request('requestAirdrop', params)
+        response['result']
+      end
     end
   end
 end
