@@ -61,6 +61,23 @@ module SolanaRuby
         response = request('requestAirdrop', params)
         response['result']
       end
+
+      def simulate_transaction(transaction, options = { encoding: 'base64' })
+        params = [transaction, options]
+        response = request('simulateTransaction', params)
+        response['result']
+      end
+
+      def send_encoded_transaction(encoded_transaction, options = { commitment: 'confirmed' })
+        send_transaction(encoded_transaction, options)
+      end
+
+      def send_raw_transaction(raw_transaction, options = {})
+        # Convert the raw hexadecimal transaction to base64 encoding
+        base64_encoded_transaction = Base64.encode64(raw_transaction)
+
+        send_transaction(base64_encoded_transaction, options)
+      end
     end
   end
 end

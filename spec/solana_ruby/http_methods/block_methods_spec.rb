@@ -396,4 +396,144 @@ RSpec.describe SolanaRuby::HttpMethods::BlockMethods do
       expect(result).to eq(first_available_block_response['result'])
     end
   end
+
+  describe '#get_blocks_with_limit' do
+    let(:url) { 'https://api.devnet.solana.com' }
+    let(:client) { SolanaRuby::HttpClient.new(url) }
+    let(:start_slot) { 500_000 }
+    let(:limit) { 10 }
+    let(:valid_response_body) do
+      {
+        jsonrpc: '2.0',
+        result: [500_000, 500_001, 500_002, 500_003, 500_004, 500_005, 500_006, 500_007, 500_008, 500_009],
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getBlocksWithLimit',
+            params: [start_slot, limit]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: valid_response_body, headers: {})
+    end
+
+    it 'returns an array of block slots within the specified limit' do
+      result = client.get_blocks_with_limit(start_slot, limit)
+      expect(result).to eq([500_000, 500_001, 500_002, 500_003, 500_004, 500_005, 500_006, 500_007, 500_008, 500_009])
+    end
+
+    context 'when there is an API error' do
+      let(:error_response_body) do
+        {
+          jsonrpc: '2.0',
+          error: { code: -32000, message: 'Server error' },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: {
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'getBlocksWithLimit',
+              params: [start_slot, limit]
+            }.to_json
+          )
+          .to_return(status: 200, body: error_response_body, headers: {})
+      end
+
+      it 'raises an API error' do
+        expect { client.get_blocks_with_limit(start_slot, limit) }.to raise_error(SolanaRuby::SolanaError, /API Error: -32000 - Server error/)
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_blocks_with_limit(start_slot, limit) }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response: Invalid JSON/)
+      end
+    end
+  end
+
+  describe '#get_block_height' do
+    let(:url) { 'https://api.devnet.solana.com' }
+    let(:client) { SolanaRuby::HttpClient.new(url) }
+    let(:valid_response_body) do
+      {
+        jsonrpc: '2.0',
+        result: 8_145_762,
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getBlockHeight',
+            params: []
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: valid_response_body, headers: {})
+    end
+
+    it 'returns the current block height' do
+      result = client.get_block_height
+      expect(result).to eq(8_145_762)
+    end
+
+    context 'when there is an API error' do
+      let(:error_response_body) do
+        {
+          jsonrpc: '2.0',
+          error: { code: -32000, message: 'Server error' },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: {
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'getBlockHeight',
+              params: []
+            }.to_json
+          )
+          .to_return(status: 200, body: error_response_body, headers: {})
+      end
+
+      it 'raises an API error' do
+        expect { client.get_block_height }.to raise_error(SolanaRuby::SolanaError, /API Error: -32000 - Server error/)
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_block_height }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response: Invalid JSON/)
+      end
+    end
+  end
 end

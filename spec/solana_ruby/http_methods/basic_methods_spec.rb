@@ -1269,4 +1269,79 @@ RSpec.describe SolanaRuby::HttpMethods::BasicMethods do
       end
     end
   end
+
+  describe '#get_recent_prioritization_fees' do
+    let(:addresses) { ['address1', 'address2'] }
+    let(:response_body) do
+      {
+        jsonrpc: '2.0',
+        result: [
+          { 'address1' => 'fee1' }, 
+          { 'address2' => 'fee2' }
+        ],
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getRecentPrioritizationFees',
+            params: [addresses]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: response_body, headers: {})
+    end
+
+    it 'returns recent prioritization fees' do
+      result = client.get_recent_prioritization_fees(addresses)
+      expect(result).to eq([
+        { 'address1' => 'fee1' }, 
+        { 'address2' => 'fee2' }
+      ])
+    end
+
+    context 'when there is an API error' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: {
+              jsonrpc: '2.0',
+              error: { code: -32000, message: 'Server error' }
+            }.to_json,
+            headers: {}
+          )
+      end
+
+      it 'raises an API error' do
+        expect { client.get_recent_prioritization_fees(addresses) }.to raise_error(
+          SolanaRuby::SolanaError,
+          /API Error: -32000 - Server error/
+        )
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(
+            status: 200,
+            body: 'Invalid JSON',
+            headers: {}
+          )
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_recent_prioritization_fees(addresses) }.to raise_error(
+          SolanaRuby::SolanaError,
+          /Invalid JSON response: Invalid JSON/
+        )
+      end
+    end
+  end
 end

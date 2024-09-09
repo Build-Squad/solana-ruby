@@ -103,6 +103,7 @@ module SolanaRuby
       def get_recent_prioritization_fees(addresses)
         params = [addresses]
         prioritization_fees = request('getRecentPrioritizationFees', params)
+        prioritization_fees['result']
       end
     end
   end
