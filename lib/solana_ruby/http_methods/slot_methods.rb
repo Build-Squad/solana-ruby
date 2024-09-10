@@ -25,7 +25,7 @@ module SolanaRuby
         slot_leaders['result']
       end
 
-      def get_minimum_ladger_slot
+      def get_minimum_ledger_slot
         minimum_ladger_slot = request('minimumLedgerSlot')
         minimum_ladger_slot['result']
       end

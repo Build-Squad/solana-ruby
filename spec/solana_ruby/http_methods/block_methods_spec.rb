@@ -536,4 +536,80 @@ RSpec.describe SolanaRuby::HttpMethods::BlockMethods do
       end
     end
   end
+
+  describe '#get_block_commitment' do
+    let(:url) { 'https://api.devnet.solana.com' }
+    let(:client) { SolanaRuby::HttpClient.new(url) }
+    let(:block) { 123456 }
+    let(:valid_response_body) do
+      {
+        jsonrpc: '2.0',
+        result: {
+          commitment: [100, 200, 300],
+          totalStake: 1000000
+        },
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getBlockCommitment',
+            params: [block]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: valid_response_body, headers: {})
+    end
+
+    it 'returns the block commitment' do
+      result = client.get_block_commitment(block)
+      expect(result).to eq({
+        'commitment' => [100, 200, 300],
+        'totalStake' => 1_000_000
+      })
+    end
+
+    context 'when there is an API error' do
+      let(:error_response_body) do
+        {
+          jsonrpc: '2.0',
+          error: { code: -32000, message: 'Server error' },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .with(
+            body: {
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'getBlockCommitment',
+              params: [block]
+            }.to_json
+          )
+          .to_return(status: 200, body: error_response_body, headers: {})
+      end
+
+      it 'raises an API error' do
+        expect { client.get_block_commitment(block) }.to raise_error(SolanaRuby::SolanaError, /API Error: -32000 - Server error/)
+      end
+    end
+
+    context 'when the response is invalid JSON' do
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: 'Invalid JSON', headers: {})
+      end
+
+      it 'raises an Invalid JSON response error' do
+        expect { client.get_block_commitment(block) }.to raise_error(SolanaRuby::SolanaError, /Invalid JSON response: Invalid JSON/)
+      end
+    end
+  end
 end
