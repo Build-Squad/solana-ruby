@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'base58'
-
 module SolanaRuby
   module HttpMethods
     module LookupTableMethods

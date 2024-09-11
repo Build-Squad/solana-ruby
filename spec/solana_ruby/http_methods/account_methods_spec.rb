@@ -551,4 +551,113 @@ RSpec.describe SolanaRuby::HttpMethods::AccountMethods do
       expect { client.get_parsed_token_accounts_by_owner(owner_pubkey, { programId: program_id }) }.to raise_error(SolanaRuby::SolanaError, /Failed to connect to the server/)
     end
   end
+
+  describe '#get_nonce_and_context' do
+    let(:pubkey) { '9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g' }
+    let(:valid_response_body) do
+      {
+        jsonrpc: '2.0',
+        result: {
+          context: { slot: 100 },
+          value: {
+            owner: '11111111111111111111111111111111',
+            data: [Base64.encode64("\x00\x00\x00\x00" + "\x00" * 32 + [10_000].pack('Q<'))]
+          }
+        },
+        id: 1
+      }.to_json
+    end
+
+    before do
+      stub_request(:post, url)
+        .with(
+          body: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getAccountInfo',
+            params: [pubkey, {}]
+          }.to_json,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+        .to_return(status: 200, body: valid_response_body, headers: {})
+    end
+
+    it 'returns the nonce account info and context' do
+      result = client.get_nonce_and_context(pubkey)
+      expect(result[:context]['slot']).to eq(100)
+      expect(result[:value][:blockhash]).to eq('0000000000000000000000000000000000000000000000000000000000000000')
+      expect(result[:value][:fee_calculator][:lamports_per_signature]).to eq(10_000)
+    end
+
+    context 'when account is not a nonce account' do
+      let(:non_nonce_account_body) do
+        {
+          jsonrpc: '2.0',
+          result: {
+            context: { slot: 100 },
+            value: {
+              owner: 'SomeOtherOwner',
+              data: []
+            }
+          },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: non_nonce_account_body, headers: {})
+      end
+
+      it 'raises an error for non-nonce account' do
+        expect { client.get_nonce_and_context(pubkey) }.to raise_error(RuntimeError, 'Provided account is not a nonce account')
+      end
+    end
+
+    context 'when nonce account data is empty' do
+      let(:empty_data_response) do
+        {
+          jsonrpc: '2.0',
+          result: {
+            context: { slot: 100 },
+            value: {
+              owner: '11111111111111111111111111111111',
+              data: []
+            }
+          },
+          id: 1
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, url)
+          .to_return(status: 200, body: empty_data_response, headers: {})
+      end
+
+      it 'raises an error for empty nonce account data' do
+        expect { client.get_nonce_and_context(pubkey) }.to raise_error(RuntimeError, 'Nonce account data is empty')
+      end
+    end
+  end
+
+  describe '#get_nonce' do
+    let(:pubkey) { '9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g' }
+    before do
+      allow(client).to receive(:get_nonce_and_context).with(pubkey).and_return(
+        context: { slot: 100 },
+        value: {
+          blockhash: '00' * 32,
+          fee_calculator: { lamports_per_signature: 10_000 }
+        }
+      )
+    end
+
+    it 'returns only the nonce value' do
+      nonce_value = client.get_nonce(pubkey)
+      expect(nonce_value).to eq(
+        blockhash: '00' * 32,
+        fee_calculator: { lamports_per_signature: 10_000 }
+      )
+    end
+  end
 end

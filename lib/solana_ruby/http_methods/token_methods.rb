@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry'
-require 'base58'
-
 module SolanaRuby
   module HttpMethods
     module TokenMethods

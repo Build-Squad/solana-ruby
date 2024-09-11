@@ -1,34 +1,22 @@
 # frozen_string_literal: true
 
-require "net/http"
-require "json"
-require "uri"
+require 'net/http'
+require 'json'
+require 'uri'
 require 'pry'
 require 'base64'
 require 'base58'
-require_relative "http_methods/basic_methods"
-require_relative "http_methods/lookup_table_methods"
-require_relative "http_methods/transaction_methods"
-require_relative "http_methods/signature_methods"
-require_relative "http_methods/blockhash_methods"
-require_relative "http_methods/block_methods"
-require_relative "http_methods/account_methods"
-require_relative "http_methods/token_methods"
-require_relative "http_methods/slot_methods"
-require_relative "base_client"
+require_relative 'base_client'
+Dir[File.join(__dir__, 'http_methods', '*.rb')].each { |file| require file }
 
 module SolanaRuby
   class HttpClient < BaseClient
-    include HttpMethods::BasicMethods
-    include HttpMethods::LookupTableMethods
-    include HttpMethods::TransactionMethods
-    include HttpMethods::SignatureMethods
-    include HttpMethods::BlockhashMethods
-    include HttpMethods::BlockMethods
-    include HttpMethods::AccountMethods
-    include HttpMethods::TokenMethods
-    include HttpMethods::SlotMethods
-    BASE_URL = "https://api.mainnet-beta.solana.com"
+    [HttpMethods::BasicMethods, HttpMethods::LookupTableMethods, HttpMethods::TransactionMethods,
+      HttpMethods::SignatureMethods, HttpMethods::BlockhashMethods, HttpMethods::BlockMethods,
+      HttpMethods::AccountMethods, HttpMethods::TokenMethods, HttpMethods::SlotMethods].each do |mod|
+      include mod
+    end
+    BASE_URL = 'https://api.mainnet-beta.solana.com'
 
     def initialize(endpoint = BASE_URL)
       @uri = URI.parse(endpoint)
@@ -40,7 +28,7 @@ module SolanaRuby
 
       request = Net::HTTP::Post.new(@uri.request_uri, {'Content-Type' => 'application/json'})
       request.body = {
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         id: 1,
         method: method,
         params: params

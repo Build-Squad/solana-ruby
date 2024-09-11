@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require_relative 'signature_methods'
 
 module SolanaRuby
   module HttpMethods
@@ -19,7 +18,7 @@ module SolanaRuby
         
         loop do
           # Fetch transaction status
-          options = { "searchTransactionHistory" => true }
+          options = { searchTransactionHistory: true }
           status_info = get_signature_status(signature, options)
 
           # Check if the transaction is confirmed based on the commitment level
