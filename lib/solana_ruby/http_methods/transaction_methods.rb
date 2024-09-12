@@ -6,6 +6,8 @@ module SolanaRuby
       DEFAULT_COMMITMENT = 'finalized'
       TIMEOUT = 60 # seconds
       RETRY_INTERVAL = 2 # seconds
+      ENCODED_TRANSACTION_OPTIONS = { skipPreflight: false }.freeze
+      FINALIZED_OPTIONS = { commitment: 'finalized' }.freeze
 
       def send_transaction(signed_transaction, options = {})
         params = [signed_transaction, options]
@@ -41,12 +43,12 @@ module SolanaRuby
         response['result']
       end
 
-      def get_transaction_count(options = { commitment: 'finalized' })
+      def get_transaction_count(options = FINALIZED_OPTIONS)
         result = request('getTransactionCount', [options])
         result['result']
       end
 
-      def get_transactions(signatures, options = { commitment: 'finalized' })
+      def get_transactions(signatures, options = FINALIZED_OPTIONS)
         transactions = []
         signatures.each do |signature|
           transaction = get_transaction(signature, options)
@@ -67,11 +69,11 @@ module SolanaRuby
         response['result']
       end
 
-      def send_encoded_transaction(encoded_transaction, options = { commitment: 'confirmed' })
+      def send_encoded_transaction(encoded_transaction, options = ENCODED_TRANSACTION_OPTIONS.merge(FINALIZED_OPTIONS))
         send_transaction(encoded_transaction, options)
       end
 
-      def send_raw_transaction(raw_transaction, options = {})
+      def send_raw_transaction(raw_transaction, options = ENCODED_TRANSACTION_OPTIONS.merge(FINALIZED_OPTIONS))
         # Convert the raw hexadecimal transaction to base64 encoding
         base64_encoded_transaction = Base64.encode64(raw_transaction)
 
