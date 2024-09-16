@@ -4,19 +4,24 @@ require 'websocket-client-simple'
 require 'securerandom'
 require 'json'
 require 'pry'
-require_relative "Web_socket_handlers"
+require_relative 'web_socket_handlers'
 
 module SolanaRuby
   class WebSocketClient
     include WebSocketHandlers
     attr_reader :subscriptions
 
-    def initialize(url)
+    def initialize(url, auto_reconnect: true, reconnect_delay: 5)
       @url = url
       @subscriptions = {}
-      @ws = WebSocket::Client::Simple.connect(@url)
+      @auto_reconnect = auto_reconnect
+      @reconnect_delay = reconnect_delay
+      connect
+    end
 
-      WebSocketHandlers.setup_handlers(@ws, self)
+    def connect
+      @ws = WebSocket::Client::Simple.connect(@url)
+      setup_handlers(@ws, self)
     end
 
     def subscribe(method, params = nil, &block)
@@ -55,6 +60,12 @@ module SolanaRuby
       end
     end
 
+    def attempt_reconnect
+      puts "Attempting to reconnect in #{@reconnect_delay} seconds..."
+      sleep @reconnect_delay
+      connect
+    end
+
     private
 
     def generate_id
@@ -63,20 +74,32 @@ module SolanaRuby
   end
 end
 
+# testing
 
 # client = SolanaRuby::WebSocketClient.new("wss://api.devnet.solana.com")
 
 # account_pubkey = "9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g"
+# params = [
+#     {
+#       mentionsAccountOrProgram: "11111111111111111111111111111111"
+#     },
+#     {
+#       commitment: "confirmed",
+#       encoding: "base64",
+#       showRewards: true,
+#       transactionDetails: "full"
+#     }
+#   ]
 
 # # Subscribe to account updates
-# subscription_id = client.subscribe("accountSubscribe", [account_pubkey]) do |message|
+# subscription_id = client.subscribe("blockSubscribe", ['all']) do |message|
 #   puts "The updates is: #{message}"
 # end
 
 # # Simulate running for a while to receive messages
-# sleep(120)
+# sleep(10)
 
 # # Unsubscribe
-# client.unsubscribe("accountSubscribe", subscription_id)
+# res = client.unsubscribe("blockUnsubscribe", subscription_id)
 
-
+# puts "unsubscribe: #{res}, #{subscription_id}"
