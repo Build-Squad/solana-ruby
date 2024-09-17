@@ -79,27 +79,27 @@ end
 # client = SolanaRuby::WebSocketClient.new("wss://api.devnet.solana.com")
 
 # account_pubkey = "9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g"
-# params = [
-#     {
-#       mentionsAccountOrProgram: "11111111111111111111111111111111"
-#     },
-#     {
-#       commitment: "confirmed",
-#       encoding: "base64",
-#       showRewards: true,
-#       transactionDetails: "full"
-#     }
-#   ]
+# # params = [
+# #     {
+# #       mentionsAccountOrProgram: "11111111111111111111111111111111"
+# #     },
+# #     {
+# #       commitment: "confirmed",
+# #       encoding: "base64",
+# #       showRewards: true,
+# #       transactionDetails: "full"
+# #     }
+# #   ]
 
 # # Subscribe to account updates
-# subscription_id = client.subscribe("blockSubscribe", ['all']) do |message|
+# subscription_id = client.subscribe("accountSubscribe", [account_pubkey]) do |message|
 #   puts "The updates is: #{message}"
 # end
 
-# # Simulate running for a while to receive messages
+# # # Simulate running for a while to receive messages
 # sleep(10)
 
-# # Unsubscribe
-# res = client.unsubscribe("blockUnsubscribe", subscription_id)
+# # # Unsubscribe
+# res = client.unsubscribe("accountSubscribe", subscription_id)
 
 # puts "unsubscribe: #{res}, #{subscription_id}"

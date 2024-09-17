@@ -4,8 +4,16 @@ module SolanaRuby
   module WebSocketHandlers
     def setup_handlers(ws, client)
       ws.on :message do |msg|
-        data = JSON.parse(msg.data)
-        client.handle_message(data)
+        begin
+          data = JSON.parse(msg.data)
+          if data['error']
+            puts "Error: #{data['error']['message']} with the code #{data['error']['code']}"
+          else
+            client.handle_message(data)
+          end
+        rescue JSON::ParserError => e
+          puts "Failed to parse message: #{e.message}"
+        end
       end
 
       ws.on :open do
