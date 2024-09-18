@@ -16,16 +16,32 @@ module SolanaRuby
       @subscriptions = {}
       @auto_reconnect = auto_reconnect
       @reconnect_delay = reconnect_delay
+      @connected = false
+      @ws = nil
       connect
     end
 
     def connect
+      return if @connected
+
+      # Close existing WebSocket if it exists
+      @ws&.close if @ws
+
       @ws = WebSocket::Client::Simple.connect(@url)
       setup_handlers(@ws, self)
+      @connected = true
+    rescue StandardError => e
+      puts "Failed to connect: #{e.message}"
+      attempt_reconnect
+    end
+
+    def reconnect
+      @connected = false
+      connect
     end
 
     def subscribe(method, params = nil, &block)
-      id = generate_id
+      id = SecureRandom.uuid
       @subscriptions[id] = block
       message = {
         jsonrpc: '2.0',
@@ -41,7 +57,7 @@ module SolanaRuby
     def unsubscribe(method, subscription_id)
       message = {
         jsonrpc: '2.0',
-        id: generate_id,
+        id: SecureRandom.uuid,
         method: method,
         params: [subscription_id]
       }
@@ -61,45 +77,11 @@ module SolanaRuby
     end
 
     def attempt_reconnect
+      return unless @auto_reconnect
+
       puts "Attempting to reconnect in #{@reconnect_delay} seconds..."
       sleep @reconnect_delay
       connect
     end
-
-    private
-
-    def generate_id
-      SecureRandom.uuid
-    end
   end
 end
-
-# testing
-
-# client = SolanaRuby::WebSocketClient.new("wss://api.devnet.solana.com")
-
-# account_pubkey = "9B5XszUGdMaxCZ7uSQhPzdks5ZQSmWxrmzCSvtJ6Ns6g"
-# # params = [
-# #     {
-# #       mentionsAccountOrProgram: "11111111111111111111111111111111"
-# #     },
-# #     {
-# #       commitment: "confirmed",
-# #       encoding: "base64",
-# #       showRewards: true,
-# #       transactionDetails: "full"
-# #     }
-# #   ]
-
-# # Subscribe to account updates
-# subscription_id = client.subscribe("accountSubscribe", [account_pubkey]) do |message|
-#   puts "The updates is: #{message}"
-# end
-
-# # # Simulate running for a while to receive messages
-# sleep(10)
-
-# # # Unsubscribe
-# res = client.unsubscribe("accountSubscribe", subscription_id)
-
-# puts "unsubscribe: #{res}, #{subscription_id}"
