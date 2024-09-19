@@ -80,8 +80,10 @@ module SolanaRuby
       return unless @auto_reconnect
 
       puts "Attempting to reconnect in #{@reconnect_delay} seconds..."
+      @connected = false
       sleep @reconnect_delay
-      connect
+      reconnect
     end
   end
 end
+
