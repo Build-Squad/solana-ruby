@@ -5,10 +5,12 @@ require 'securerandom'
 require 'json'
 require 'pry'
 require_relative 'web_socket_handlers'
+Dir[File.join(__dir__, 'web_socket_methods', '*.rb')].each { |file| require file }
 
 module SolanaRuby
   class WebSocketClient
     include WebSocketHandlers
+    include WebSocketMethods::AccountMethods
     attr_reader :subscriptions
 
     def initialize(url, auto_reconnect: true, reconnect_delay: 5)
@@ -86,4 +88,3 @@ module SolanaRuby
     end
   end
 end
-
