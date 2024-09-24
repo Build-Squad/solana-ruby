@@ -36,4 +36,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rubycritic', '~> 4.9.0'
   spec.add_dependency 'simplecov', '~> 0.22.0'
   spec.add_dependency 'pry', '~> 0.14.2'
+  spec.add_dependency 'base58'
+  spec.add_dependency 'base64'
 end
