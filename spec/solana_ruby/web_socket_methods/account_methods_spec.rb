@@ -140,4 +140,90 @@ RSpec.describe SolanaRuby::WebSocketMethods::AccountMethods do
       expect(client.subscriptions).not_to have_key(subscription_id)
     end
   end
+
+  describe '#on_program_account_change' do
+    let(:program_id) { '11111111111111111111111111111111' }
+    let(:response) do
+      {
+        jsonrpc: '2.0',
+        id: generated_id,
+        result: 'account data'
+      }.to_json
+    end
+
+    context 'with default parameters' do
+      it 'sends a subscription request with default encoding and commitment' do
+        client.on_program_account_change(program_id)
+
+        expected_message = {
+          jsonrpc: '2.0',
+          id: generated_id,
+          method: 'programSubscribe',
+          params: [program_id, { encoding: 'base64', commitment: 'finalized' }]
+        }.to_json
+
+        expect(ws_instance).to have_received(:send).with(expected_message)
+      end
+
+      it 'handles received messages and triggers callback for program account changes' do
+        callback = double('Callback')
+        expect(callback).to receive(:call).with('account data')
+
+        client.on_program_account_change(program_id) do |result|
+          callback.call(result)
+        end
+
+        # Simulate WebSocket message event
+        @message_callback.call(double('Message', data: response))
+      end
+    end
+
+    context 'with custom encoding' do
+      it 'sends a subscription request with jsonParsed encoding' do
+        client.on_program_account_change(program_id, { encoding: 'jsonParsed', commitment: 'finalized' })
+
+        expected_message = {
+          jsonrpc: '2.0',
+          id: generated_id,
+          method: 'programSubscribe',
+          params: [program_id, { encoding: 'jsonParsed', commitment: 'finalized' }]
+        }.to_json
+
+        expect(ws_instance).to have_received(:send).with(expected_message)
+      end
+    end
+
+    context 'with filters' do
+      let(:filters) { [{ dataSize: 80 }] }
+
+      it 'sends a subscription request with filters' do
+        client.on_program_account_change(program_id, { encoding: 'base64', commitment: 'finalized' }, filters)
+
+        expected_message = {
+          jsonrpc: '2.0',
+          id: generated_id,
+          method: 'programSubscribe',
+          params: [program_id, { encoding: 'base64', commitment: 'finalized', filters: filters }]
+        }.to_json
+
+        expect(ws_instance).to have_received(:send).with(expected_message)
+      end
+    end
+  end
+
+  describe '#remove_program_account_listener' do
+    it 'unsubscribes from program account change updates' do
+      subscription_id = generated_id
+      expected_message = {
+        jsonrpc: '2.0',
+        id: SecureRandom.uuid,
+        method: 'programUnsubscribe',
+        params: [subscription_id]
+      }.to_json
+
+      client.remove_program_account_listener(subscription_id)
+
+      expect(ws_instance).to have_received(:send).with(expected_message)
+    end
+  end
 end
