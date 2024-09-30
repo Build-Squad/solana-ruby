@@ -88,29 +88,53 @@ The filters parameter allows you to specify conditions for querying token accoun
     # Program Filter: Filter by a specific program (e.g., the token program).
     filters = { programId: 'TokenProgramPublicKey' }
 
-## Default Options
+## WebSocket Methods
 
-Several methods have optional parameters where default options are defined in the client. These options can be customized or overridden when calling the methods, but if left unspecified, the client will use its internal defaults.
+The SolanaRuby gem also provides WebSocket methods to handle real-time notifications and updates from the Solana blockchain. To use the WebSocket client:
 
-## Available Methods
+    # Initialize the WebSocket client
+    ws_client = SolanaRuby::WebSocketClient.new("wss://api.mainnet-beta.solana.com")
+
+    # Subscribe to slot change notifications
+    ws_client.on_slot_change do |slot_info|
+      puts "Slot changed: #{slot_info}"
+    end
+
+The following methods are supported by the WebSocketClient:
+
+- on_slot_change(&block): Subscribe to slot change notifications.
+- remove_slot_change_listener(subscription_id): Unsubscribe from slot change notifications.
+
+
+## Complete List of Available Methods
+
+### HTTP Methods
 
 The following methods are supported by the SolanaRuby::HttpClient:
 
+#### Basic
     get_balance(pubkey)
     get_balance_and_context(pubkey)
     get_slot()
     get_epoch_info(options)
-    get_account_info(pubkey)
     get_epoch_schedule()
     get_genesis_hash()
     get_inflation_governor()
     get_inflation_rate()
     get_inflation_reward(addresses, options)
     get_leader_schedule(options)
-    get_minimum_ladger_slot()
-    get_max_retransmit_slot()
-    get_max_shred_insert_slot()
+    get_minimum_balance_for_rent_exemption(account_data_size, options)
     get_stake_activation(account_pubkey, options)
+    get_stake_minimum_delegation(options)
+    get_supply(options)
+    get_version()
+    get_total_supply(options)
+    get_health()
+    get_identity()
+    get_recent_performance_samples(limit)
+    get_recent_prioritization_fees(addresses)
+
+#### Account
     get_account_info(pubkey)
     get_parsed_account_info(pubkey, options)
     get_account_info_and_context(pubkey, options)
@@ -122,5 +146,82 @@ The following methods are supported by the SolanaRuby::HttpClient:
     get_parsed_program_accounts(program_id, options)
     get_vote_accounts(options)
     get_parsed_token_accounts_by_owner(owner_pubkey, filters, options)
-    And more...
+    get_nonce_and_context(pubkey)
+    get_nonce(pubkey)
+
+#### Block
+    get_nonce(pubkey)
+    get_block(slot, options)
+    get_block_production()
+    get_block_time(slot)
+    get_block_signatures(slot, options)
+    get_cluster_nodes()
+    get_confirmed_block(slot, options)
+    get_confirmed_block_signatures(slot)
+    get_parsed_block(slot, options)
+    get_first_available_block()
+    get_blocks_with_limit(start_slot, limit)
+    get_block_height()
+    get_block_commitment(block_slot)
+
+#### Blockhash
+    get_latest_blockhash()
+    get_latest_blockhash()
+    get_fee_for_message(blockhash, options)
+    is_blockhash_valid?(blockhash, options)
+
+#### Lookup Table
+    get_address_lookup_table(pubkey)
+
+#### Signature
+    get_signature_statuses(signatures)
+    get_signature_status(signature, options)
+    get_signatures_for_address(address, options)
+
+#### Slot
+    get_slot()
+    get_slot_leader(options)
+    get_slot_leaders(start_slot, limit)
+    get_highest_snapshot_slot()
+    get_minimum_ladger_slot()
+    get_max_retransmit_slot()
+    get_max_shred_insert_slot()
+
+#### Token
+    get_token_balance(pubkey, options)
+    get_token_supply(pubkey)
+    get_token_accounts_by_owner(owner_pubkey, filters, options)
+    get_token_largest_accounts(mint_pubkey, options)
+
+#### Transaction
+    send_transaction(signed_transaction, options)
+    confirm_transaction(signature, commitment, timeout)
+    get_transaction(signature, options)
+    get_transaction_count(options)
+    get_transactions(signatures, options)
+    request_airdrop(pubkey, lamports, options)
+    simulate_transaction(transaction, options)
+    send_encoded_transaction(encoded_transaction, options)
+    send_raw_transaction(raw_transaction, options)
+
+### WebSocket Methods
+
+    on_account_change(pubkey, options)
+    on_program_account_change(program_id, options, filters)
+    on_logs(options=['all'])
+    on_logs_for_account(public_key)
+    on_logs_for_program(program_id)
+    on_root_change()
+    on_signature(signature)
+    on_signature_with_options(signature, options)
+    remove_account_change_listener(subscription_id)
+    remove_program_account_listener(subscription_id)
+    remove_logs_listener(subscription_id)
+    remove_root_listener(subscription_id)
+    remove_signature_listener(subscription_id)
+    remove_slot_change_listener(subscription_id)
+
+## Default Options
+
+Several methods have optional parameters where default options are defined in the client. These options can be customized or overridden when calling the methods, but if left unspecified, the client will use its internal defaults.
 

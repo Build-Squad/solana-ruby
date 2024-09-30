@@ -14,6 +14,7 @@ module SolanaRuby
     include WebSocketMethods::LogMethods
     include WebSocketMethods::SignatureMethods
     include WebSocketMethods::RootMethods
+    include WebSocketMethods::SlotMethods
     attr_reader :subscriptions
 
     def initialize(url, auto_reconnect: true, reconnect_delay: 5)
