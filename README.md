@@ -96,9 +96,16 @@ The SolanaRuby gem also provides WebSocket methods to handle real-time notificat
     ws_client = SolanaRuby::WebSocketClient.new("wss://api.mainnet-beta.solana.com")
 
     # Subscribe to slot change notifications
-    ws_client.on_slot_change do |slot_info|
+    subscription_id = ws_client.on_slot_change do |slot_info|
       puts "Slot changed: #{slot_info}"
     end
+
+    # Sleep to hold the process and show updates
+    sleep 60 # Adjust the duration as needed to view updates
+
+    # Unsubscribe from slot change notifications
+    ws_client.remove_slot_change_listener(subscription_id)
+    puts "Unsubscribed from slot change notifications."
 
 The following methods are supported by the WebSocketClient:
 
@@ -205,6 +212,8 @@ The following methods are supported by the SolanaRuby::HttpClient:
     send_raw_transaction(raw_transaction, options)
 
 ### WebSocket Methods
+
+The following methods are supported by the SolanaRuby::WebSocketClient:
 
     on_account_change(pubkey, options)
     on_program_account_change(program_id, options, filters)
