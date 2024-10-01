@@ -115,7 +115,7 @@ The following methods are supported by the WebSocketClient:
 
 - Program Account Change: Subscribe to changes in accounts owned by a specific program.
 
-    ws_client.on_program_account_change(program_id, filters) { |program_account_info| puts program_account_info }
+    ==ws_client.on_program_account_change(program_id, filters) { |program_account_info| puts program_account_info }==
 
 - Logs: Subscribe to transaction logs.
 
