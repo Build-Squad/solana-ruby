@@ -5,8 +5,8 @@ require_relative "lib/solana_ruby/version"
 Gem::Specification.new do |spec|
   spec.name          = "solana_ruby"
   spec.version       = SolanaRuby::VERSION
-  spec.authors       = ["Navtech Team"]
-  spec.email         = ["china.bellamkonda@navtech.io"]
+  spec.authors       = ["BuildSquad"]
+  spec.email         = ["engineering@buildsquad.net"]
   spec.licenses      = ['MIT']
   spec.summary       = "Solana Ruby SDK"
   spec.description   = "This gem allows to use JSON RPC API Methods from solana."
