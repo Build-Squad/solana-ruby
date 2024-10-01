@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.licenses      = ['MIT']
   spec.summary       = "Solana Ruby SDK"
   spec.description   = "This gem allows to use JSON RPC API Methods from solana."
-  spec.homepage      = "https://github.com/navtech-io/solana-ruby"
+  spec.homepage      = "https://github.com/Build-Squad/solana-ruby"
   spec.required_ruby_version = ">= 3.0.0"
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
@@ -23,6 +23,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'websocket-client-simple', '~> 0.8.0'
-  spec.add_dependency 'base58'
-  spec.add_dependency 'base64'
+  spec.add_dependency 'base58', '~> 0.2.3'
+  spec.add_dependency 'base64', '~> 0.2.0'
 end

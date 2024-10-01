@@ -109,8 +109,46 @@ The SolanaRuby gem also provides WebSocket methods to handle real-time notificat
 
 The following methods are supported by the WebSocketClient:
 
-- on_slot_change(&block): Subscribe to slot change notifications.
-- remove_slot_change_listener(subscription_id): Unsubscribe from slot change notifications.
+- Account Change: Subscribe to changes in an account's state.
+
+    ws_client.on_account_change(pubkey) { |account_info| puts account_info }
+
+- Program Account Change: Subscribe to changes in accounts owned by a specific program.
+
+    ws_client.on_program_account_change(program_id, filters) { |program_account_info| puts program_account_info }
+
+- Logs: Subscribe to transaction logs.
+
+    ws_client.on_logs { |logs_info| puts logs_info }
+
+- Logs for a Specific Account: Subscribe to logs related to a specific account.
+
+    ws_client.on_logs_for_account(account_pubkey) { |logs_info| puts logs_info }
+
+- Logs for a Specific Program: Subscribe to logs related to a specific program.
+
+    ws_client.on_logs_for_program(program_id) { |logs_info| puts logs_info }
+
+- Root Change: Subscribe to root changes.
+
+    ws_client.on_root_change { |root_info| puts root_info }
+
+- Signature: Subscribe to a signature notification.
+
+    ws_client.on_signature(signature) { |signature_info| puts signature_info }
+
+- Slot Change: Subscribe to slot changes.
+
+    ws_client.on_slot_change { |slot_info| puts slot_info }
+
+- Unsubscribe Methods: Each WebSocket method has a corresponding unsubscribe method:
+
+    - remove_account_change_listener(subscription_id)
+    - remove_program_account_listener(subscription_id)
+    - remove_logs_listener(subscription_id)
+    - remove_root_listener(subscription_id)
+    - remove_signature_listener(subscription_id)
+    - remove_slot_change_listener(subscription_id)
 
 
 ## Complete List of Available Methods
