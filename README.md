@@ -7,7 +7,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'solana_ruby', github: 'Build-Squad/solana-ruby', branch: 'main'
+gem 'solana-ruby-web3js'
 ```
 
 And then execute:
@@ -16,8 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install specific_install
-    $ gem specific_install https://github.com/Build-Squad/solana-ruby.git
+    $ gem install solana-ruby-web3js
 
 ## Usage
 
