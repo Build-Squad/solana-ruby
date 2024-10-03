@@ -67,7 +67,7 @@ For a more detailed overview of Solana's available RPC methods, visit the offici
 
 ### Options Parameter
 
-The options parameter is a hash that can include the following fields:
+The options parameter is a hash that can include the following fields and more, allowing for customized responses:
 
 - **commitment**: Specifies the level of commitment desired when querying state. Options include:
 
@@ -83,7 +83,7 @@ The options parameter is a hash that can include the following fields:
 
 - **epoch**: Specify the epoch when querying for certain information like epoch details.
 
-        skipPreflight: If true, skip the preflight transaction verification. Preflight ensures that a transaction is valid before sending it to the network, but skipping this can result in faster submission.
+- **skipPreflight**: If true, skip the preflight transaction verification. Preflight ensures that a transaction is valid before sending it to the network, but skipping this can result in faster submission.
 
 - **maxRetries**: Specify how many times to retry sending a transaction before giving up.
 
