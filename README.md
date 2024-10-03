@@ -115,33 +115,34 @@ You can use the filters parameter to apply conditions for certain queries, such 
 
 - Filter accounts by a specific token mint.
 
-    `filters = [{ mint: 'TokenMintPublicKey' }]`
-    `result = client.get_token_accounts_by_owner(owner_pubkey, filters)`
+``  filters = [{ mint: 'TokenMintPublicKey' }]
+    result = client.get_token_accounts_by_owner(owner_pubkey, filters)``
 
 #### Program Filter
 
 - Filter accounts associated with a particular program, such as the token program.
 
-    `filters = [{ programId: 'TokenProgramPublicKey' }]`
-    `result = client.get_token_accounts_by_owner(owner_pubkey, filters)`
+``  filters = [{ programId: 'TokenProgramPublicKey' }]
+    result = client.get_token_accounts_by_owner(owner_pubkey, filters)``
 
 #### Data Size Filter
 
 - Filter accounts by the exact size of the account data.
 
-    `filters = [{ dataSize: 165 }]`
-    `result = client.get_program_accounts('ProgramPublicKey', filters)`
+``  filters = [{ dataSize: 165 }]
+    result = client.get_program_accounts('ProgramPublicKey', filters)``
+
 #### Memcmp Filter
 
 - Filter by matching a specific slice of bytes at a given offset in account data.
 
-    `filters = [{`
-      `memcmp: {`
-        `offset: 0,`
-        `bytes: 'Base58EncodedBytes'`
-      `}`
-    `}]`
-    `result = client.get_program_accounts('ProgramPublicKey', filters)`
+``  filters = [{
+      memcmp: {
+        offset: 0,
+        bytes: 'Base58EncodedBytes'
+      }
+    }]
+    result = client.get_program_accounts('ProgramPublicKey', filters)``
 
 ## WebSocket Methods
 
