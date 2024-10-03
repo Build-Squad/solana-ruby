@@ -3,7 +3,6 @@
 require 'net/http'
 require 'json'
 require 'uri'
-require 'pry'
 require 'base64'
 require 'base58'
 require_relative 'base_client'

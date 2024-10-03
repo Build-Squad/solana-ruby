@@ -3,7 +3,6 @@
 require 'websocket-client-simple'
 require 'securerandom'
 require 'json'
-require 'pry'
 require_relative 'web_socket_handlers'
 Dir[File.join(__dir__, 'web_socket_methods', '*.rb')].each { |file| require file }
 

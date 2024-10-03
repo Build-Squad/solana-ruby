@@ -57,6 +57,14 @@ Once the client is initialized, you can make API calls to the Solana network. Fo
 
     puts result
 
+### More Information on Solana Methods
+
+For a more detailed overview of Solana's available RPC methods, visit the official documentation:
+
+- [Solana HTTP RPC Methods](https://solana.com/docs/rpc/http)
+- [Solana WebSocket RPC Methods](https://solana.com/docs/rpc/websocket)
+- [Solana web3.js Connection Methods](https://solana-labs.github.io/solana-web3.js/classes/Connection.html)
+
 ### Options Parameter
 
 The options parameter is a hash that can include the following fields:
