@@ -69,31 +69,79 @@ For a more detailed overview of Solana's available RPC methods, visit the offici
 
 The options parameter is a hash that can include the following fields:
 
-commitment: Specifies the level of commitment desired when querying state.
+- **commitment**: Specifies the level of commitment desired when querying state. Options include:
 
-Options include:
+    - 'finalized': Query the most recent block confirmed by supermajority of the cluster.
+    - 'confirmed': Query the most recent block that has been voted on by supermajority of the cluster.
+    - 'processed': Query the most recent block regardless of cluster voting.
 
-    'finalized': Query the most recent block confirmed by supermajority of the cluster.
-    'confirmed': Query the most recent block that has been voted on by supermajority of the cluster.
-    'processed': Query the most recent block regardless of cluster voting.
+- **encoding**: Defines the format of the returned account data. Possible values include:
 
-encoding: Defines the format of the returned account data. Possible values include:
+    - 'jsonParsed': Returns data in a JSON-parsed format.
+    - 'base64': Returns raw account data in Base64 encoding.
+    - 'base64+zstd': Returns compressed Base64 data.
 
-    'jsonParsed': Returns data in a JSON-parsed format.
-    'base64': Returns raw account data in Base64 encoding.
-    'base64+zstd': Returns compressed Base64 data.
+- **epoch**: Specify the epoch when querying for certain information like epoch details.
+
+        skipPreflight: If true, skip the preflight transaction verification. Preflight ensures that a transaction is valid before sending it to the network, but skipping this can result in faster submission.
+
+- **maxRetries**: Specify how many times to retry sending a transaction before giving up.
+
+- **recentBlockhash**: Provide a custom recent blockhash for a transaction if not relying on the default.
 
 By providing options, you can control the nature of the returned data and the reliability of the query.
 
 ### Filters Parameter
 
-The filters parameter allows you to specify conditions for querying token accounts. Some common filter types include:
+The filters parameter allows you to specify conditions when querying accounts and other resources. Here are some common filters:
 
-    # Mint Filter: Filter by a specific token mint. This retrieves accounts holding tokens of that mint.
-    filters = { mint: 'TokenMintPublicKey' }
+#### Token Accounts by Owner
 
-    # Program Filter: Filter by a specific program (e.g., the token program).
-    filters = { programId: 'TokenProgramPublicKey' }
+    # Replace 'owner_pubkey' with the owner's public key
+    owner_pubkey = 'Fg6PaFpoGXkYsidMpWxTWqSKJf6KJkUxX92cnv7WMd2J'
+    
+    # Query for token accounts owned by this public key
+    filters = [{ mint: 'TokenMintPublicKey' }]
+    
+    result = client.get_token_accounts_by_owner(owner_pubkey, filters)
+    
+    puts result
+
+#### Account Filters
+
+You can use the filters parameter to apply conditions for certain queries, such as fetching token accounts by a specific owner or a specific token program. Below are examples of filters that can be used in different queries.
+
+#### Mint Filter
+
+- Filter accounts by a specific token mint.
+
+    `filters = [{ mint: 'TokenMintPublicKey' }]`
+    `result = client.get_token_accounts_by_owner(owner_pubkey, filters)`
+
+#### Program Filter
+
+- Filter accounts associated with a particular program, such as the token program.
+
+    `filters = [{ programId: 'TokenProgramPublicKey' }]`
+    `result = client.get_token_accounts_by_owner(owner_pubkey, filters)`
+
+#### Data Size Filter
+
+- Filter accounts by the exact size of the account data.
+
+    `filters = [{ dataSize: 165 }]`
+    `result = client.get_program_accounts('ProgramPublicKey', filters)`
+#### Memcmp Filter
+
+- Filter by matching a specific slice of bytes at a given offset in account data.
+
+    `filters = [{`
+      `memcmp: {`
+        `offset: 0,`
+        `bytes: 'Base58EncodedBytes'`
+      `}`
+    `}]`
+    `result = client.get_program_accounts('ProgramPublicKey', filters)`
 
 ## WebSocket Methods
 
