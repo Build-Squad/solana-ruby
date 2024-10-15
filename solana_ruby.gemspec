@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require_relative "lib/solana_ruby/version"
 
 Gem::Specification.new do |spec|
@@ -22,6 +21,7 @@ Gem::Specification.new do |spec|
       (f == __FILE__) || f.match(%r{\A(?:(?:test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
     end
   end
+
   spec.files.reject! { |f| f.end_with?('.gem') }
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
@@ -30,6 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'websocket-client-simple', '~> 0.8.0'
   spec.add_dependency 'base58', '~> 0.2.3'
   spec.add_dependency 'base64', '~> 0.2.0'
+  spec.add_dependency 'rbnacl', '~> 6.0'
+  spec.add_dependency 'ed25519'
   spec.add_development_dependency 'brakeman', '~> 6.1.2'
   spec.add_development_dependency 'rubycritic', '~> 4.9.0'
   spec.add_development_dependency 'simplecov', '~> 0.22.0'
