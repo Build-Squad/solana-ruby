@@ -8,27 +8,26 @@ module SolanaRuby
       @data = data       # The binary data (or base64) for the instruction
     end
 
-    # Serialize the instruction into a binary format for a Solana transaction
     def serialize
       serialized_instruction = ""
 
-      # 1. Serialize the program ID
-      serialized_instruction << @program_id
+      # Serialize the program ID (ensure it's in binary form)
+      serialized_instruction << Base58.binary_to_base58(@program_id)
 
-      # 2. Serialize the number of keys
+      # Serialize the number of keys
       serialized_instruction << [@keys.length].pack("C")
 
-      # 3. Serialize each key (pubkey, is_signer, is_writable)
+      # Serialize each key (pubkey, is_signer, is_writable)
       @keys.each do |key_meta|
-        serialized_instruction << key_meta[:pubkey]
+        serialized_instruction << Base58.base58_to_binary(key_meta[:pubkey])  # Ensure it's in binary
         meta_flags = (key_meta[:is_signer] ? 1 : 0) | (key_meta[:is_writable] ? 2 : 0)
         serialized_instruction << [meta_flags].pack("C")
       end
 
-      # 4. Serialize the length of the data
+      # Serialize the length of the data
       serialized_instruction << [@data.length].pack("C")
 
-      # 5. Add the data itself (ensure it's in binary form)
+      # Add the data itself (ensure it's in binary form)
       serialized_instruction << @data
 
       serialized_instruction
