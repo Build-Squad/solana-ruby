@@ -62,28 +62,6 @@ module SolanaRuby
       Base58.binary_to_base58(signature)
     end
 
-    def deserialize(data)
-      transaction = new
-
-      # Read recent blockhash
-      transaction.recent_blockhash = data[0..31]  # Assuming 32 bytes for the blockhash
-
-      # Read fee payer
-      transaction.fee_payer = data[32..63]  # Assuming 32 bytes for the fee payer
-
-      # Read number of instructions
-      num_instructions = data[64].unpack1('C')  # Assuming a single byte for count
-
-      offset = 65  # Start reading instructions after fee payer and instruction count
-
-      num_instructions.times do
-        instruction, offset = TransactionInstruction.deserialize(data, offset)
-        transaction.instructions << instruction
-      end
-
-      transaction
-    end
-
     private
 
     def serialize_message
