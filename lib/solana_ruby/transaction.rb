@@ -17,16 +17,15 @@ module SolanaRuby
 
     def set_fee_payer(pubkey)
       puts "Setting fee payer: #{pubkey.inspect}"  # Debugging output
-      if Base58.valid?(pubkey)
-        @fee_payer = Base58.base58_to_binary(pubkey) # Ensure it uses the binary version
-      else
+      unless Base58.valid?(pubkey)
         raise "Invalid Base58 public key for fee payer: #{pubkey.inspect}"
       end
+      @fee_payer = pubkey  # Store as-is since Base58 gem can handle encoding/decoding
     end
 
     def set_recent_blockhash(blockhash)
       raise "Invalid Base58 blockhash" unless Base58.valid?(blockhash)
-      @recent_blockhash = Base58.base58_to_binary(blockhash) # Convert to binary format
+      @recent_blockhash = blockhash  # Store as-is for similar reasons
     end
 
     def serialize
@@ -34,14 +33,13 @@ module SolanaRuby
       raise "Fee payer not set" if @fee_payer.nil?
 
       transaction_data = []
-      transaction_data << @recent_blockhash
-      transaction_data << @fee_payer
+      transaction_data << Base58.base58_to_binary(@recent_blockhash)  # Convert as needed here
+      transaction_data << Base58.base58_to_binary(@fee_payer)
       transaction_data << [@instructions.length].pack("C")
 
       @instructions.each do |instruction|
         serialized_instruction = instruction.serialize
         raise "Instruction serialization failed" if serialized_instruction.nil?
-
         transaction_data << serialized_instruction
       end
 
@@ -58,8 +56,8 @@ module SolanaRuby
       message = serialize_message
       signature = signing_key.sign(message)
 
-      @signatures << signature
-      Base58.binary_to_base58(signature)
+      @signatures << signature  # Store as binary
+      Base58.binary_to_base58(signature)  # Convert to Base58 for external use
     end
 
     private
@@ -68,7 +66,7 @@ module SolanaRuby
       accounts = collect_accounts
 
       message_data = []
-      message_data << @recent_blockhash
+      message_data << Base58.base58_to_binary(@recent_blockhash)
       message_data << [accounts.length].pack("C")
 
       accounts.each do |account|
@@ -86,12 +84,12 @@ module SolanaRuby
 
     def collect_accounts
       accounts = []
-      accounts << @fee_payer if @fee_payer
+      accounts << Base58.base58_to_binary(@fee_payer) if @fee_payer
 
       @instructions.each do |instruction|
         instruction.keys.each do |key_meta|
-          pubkey = Base58.base58_to_binary(key_meta[:pubkey]) # Ensure binary
-          accounts << pubkey unless accounts.include?(pubkey)
+          pubkey_binary = Base58.base58_to_binary(key_meta[:pubkey])
+          accounts << pubkey_binary unless accounts.include?(pubkey_binary)
         end
       end
 
@@ -103,8 +101,8 @@ end
 class Base58
   ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'.freeze
 
+  # Checks if a string contains only valid Base58 characters
   def self.valid?(base58_str)
-    # Check if the string contains only valid Base58 characters
     base58_str.chars.all? { |char| ALPHABET.include?(char) }
   end
 end
