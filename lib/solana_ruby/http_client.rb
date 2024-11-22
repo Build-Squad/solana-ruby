@@ -23,7 +23,8 @@ module SolanaRuby
 
     def request(method, params = [])
       http = Net::HTTP.new(@uri.host, @uri.port)
-      http.use_ssl = true
+      local_hosts = ['localhost', '127.0.0.1', '[::1]']
+      http.use_ssl = true unless local_hosts.include?(@uri.host.downcase)
 
       request = Net::HTTP::Post.new(@uri.request_uri, {'Content-Type' => 'application/json'})
       request.body = {

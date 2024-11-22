@@ -7,12 +7,14 @@ module SolanaRuby
     def self.generate
       signing_key = RbNaCl::Signatures::Ed25519::SigningKey.generate
       public_key_bytes = signing_key.verify_key.to_bytes # Binary format for public key
-      private_key_hex = signing_key.to_bytes.unpack1('H*') # Hex format for private key
+      private_key_bytes = signing_key.to_bytes
+      private_key_hex = private_key_bytes.unpack1('H*') # Hex format for private key
 
       # Convert public key binary to Base58 for readability and compatibility
       {
-        public_key: Base58.binary_to_base58(public_key_bytes),
-        private_key: private_key_hex
+        public_key: Base58.binary_to_base58(public_key_bytes, :bitcoin),
+        private_key: private_key_hex,
+        full_private_key: Base58.binary_to_base58((private_key_bytes + public_key_bytes), :bitcoin)
       }
     end
 
@@ -31,8 +33,9 @@ module SolanaRuby
 
       # Return public key in Base58 format and private key in hex format
       {
-        public_key: Base58.binary_to_base58(public_key_bytes),
-        private_key: private_key_hex
+        public_key: Base58.binary_to_base58(public_key_bytes, :bitcoin),
+        private_key: private_key_hex,
+        full_private_key: Base58.binary_to_base58((private_key_bytes + public_key_bytes), :bitcoin)
       }
     end
   end
