@@ -218,7 +218,7 @@ module SolanaRuby
         }
       end
 
-      Message.new(
+     resp = Message.new(
         header: {
           num_required_signatures: num_required_signatures,
           num_readonly_signed_accounts:num_readonly_signed_accounts,
@@ -226,6 +226,7 @@ module SolanaRuby
         },
         account_keys: account_keys, recent_blockhash: recent_blockhash, instructions: instructs
       )
+     resp
     end
 
     def partial_sign(message, keys)
