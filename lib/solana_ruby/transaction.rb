@@ -101,10 +101,10 @@ module SolanaRuby
         return message if valid
       end
 
-      @signatures = signed_keys.map do |publicKey|
+      @signatures = signed_keys.map do |public_key|
         {
           signature: nil,
-          public_key: publicKey
+          public_key: public_key
         }
       end
 
@@ -112,21 +112,36 @@ module SolanaRuby
     end
 
     def compile_message
+      check_for_errors
+      fetch_message_data
+      message = Message.new(
+        header: {
+          num_required_signatures: @num_required_signatures,
+          num_readonly_signed_accounts: @num_readonly_signed_accounts,
+          num_readonly_unsigned_accounts: @num_readonly_unsigned_accounts,
+        },
+        account_keys: @account_keys, recent_blockhash: recent_blockhash, instructions: @instructs
+      )
+     message
+    end
+
+    def check_for_errors
       raise 'Transaction recent_blockhash required' unless recent_blockhash
 
       puts 'No instructions provided' if instructions.length < 1
 
-      if fee_payer
-      elsif signatures.length > 0 && signatures[0][:public_key]
+      if fee_payer.nil? && signatures.length > 0 && signatures[0][:public_key]
         @fee_payer = signatures[0][:public_key] if (signatures.length > 0 && signatures[0][:public_key])
-      else
-        raise('Transaction fee payer required')
       end
+      
+      raise('Transaction fee payer required') if @fee_payer.nil?
 
       instructions.each_with_index do |instruction, i|
         raise("Transaction instruction index #{i} has undefined program id") unless instruction.program_id
       end
+    end
 
+    def fetch_message_data
       program_ids = []
       account_metas= []
 
@@ -136,6 +151,31 @@ module SolanaRuby
       end
 
       # Append programID account metas
+      append_program_id(program_ids, account_metas)
+
+      # Sort. Prioritizing first by signer, then by writable
+      signer_order(account_metas)
+
+      # Cull duplicate account metas
+      unique_metas = []
+      add_unique_meta_data(unique_metas, account_metas)
+
+      add_fee_payer_meta(unique_metas)
+
+      # Disallow unknown signers
+      disallow_signers(signatures, unique_metas)
+
+      # Split out signing from non-signing keys and count header values
+      signed_keys = []
+      unsigned_keys = []
+      header_params = split_keys(unique_metas, signed_keys, unsigned_keys)
+      @account_keys = signed_keys + unsigned_keys
+      
+      # add instruction structure
+      @instructs = add_instructs
+    end
+
+    def append_program_id(program_ids, account_metas)
       program_ids.each do |programId|
         account_metas.push({
                             pubkey: programId,
@@ -143,16 +183,17 @@ module SolanaRuby
                             is_writable: false,
                           })
       end
+    end
 
-      # Sort. Prioritizing first by signer, then by writable
+    def signer_order(account_metas)
       account_metas.sort! do |x, y|
         check_signer = x[:is_signer] == y[:is_signer] ? nil : x[:is_signer] ? -1 : 1
         check_writable = x[:is_writable] == y[:is_writable] ? nil : (x[:is_writable] ? -1 : 1)
         (check_signer || check_writable) || 0
       end
+    end
 
-      # Cull duplicate account metas
-      unique_metas = []
+    def add_unique_meta_data(unique_metas, account_metas)
       account_metas.each do |account_meta|
         pubkey_string = account_meta[:pubkey]
         unique_index = unique_metas.find_index{|x| x[:pubkey] == pubkey_string }
@@ -162,10 +203,11 @@ module SolanaRuby
           unique_metas.push(account_meta);
         end
       end
+    end
 
+    def add_fee_payer_meta(unique_metas)
       # Move fee payer to the front
       fee_payer_index = unique_metas.find_index { |x| x[:pubkey] == fee_payer }
-
       if fee_payer_index
         payer_meta = unique_metas.delete_at(fee_payer_index)
         payer_meta[:is_signer] = true
@@ -178,10 +220,11 @@ module SolanaRuby
                               is_writable: true,
                             })
       end
+    end
 
-      # Disallow unknown signers
+    def disallow_signers(signatures, unique_metas)
       signatures.each do |signature|
-        unique_index = unique_metas.find_index{|x| x[:pubkey] == signature[:public_key]}
+        unique_index = unique_metas.find_index{ |x| x[:pubkey] == signature[:public_key] }
 
         if unique_index
           unique_metas[unique_index][:is_signer] = true unless unique_metas[unique_index][:is_signer]
@@ -189,44 +232,32 @@ module SolanaRuby
           raise "unknown signer: #{signature[:public_key]}"
         end
       end
+    end
 
-      num_required_signatures = 0
-      num_readonly_signed_accounts = 0
-      num_readonly_unsigned_accounts = 0
-
-      # Split out signing from non-signing keys and count header values
-      signed_keys = []
-      unsigned_keys = []
-      unique_metas.each do |meta|
-        if meta[:is_signer]
-          signed_keys.push(meta[:pubkey])
-          num_required_signatures += 1
-          num_readonly_signed_accounts += 1 if (!meta[:is_writable])
-        else
-          unsigned_keys.push(meta[:pubkey])
-          num_readonly_unsigned_accounts += 1 if (!meta[:is_writable])
-        end
-      end
-
-      account_keys = signed_keys + unsigned_keys
-
-      instructs = instructions.map do |instruction|
+    def add_instructs
+      instructions.map do |instruction|
         {
-          program_id_index: account_keys.index(instruction.program_id),
-          accounts: instruction.keys.map {|meta| account_keys.index(meta[:pubkey])},
+          program_id_index: @account_keys.index(instruction.program_id),
+          accounts: instruction.keys.map { |meta| @account_keys.index(meta[:pubkey]) },
           data: instruction.data
         }
       end
+    end
 
-     resp = Message.new(
-        header: {
-          num_required_signatures: num_required_signatures,
-          num_readonly_signed_accounts:num_readonly_signed_accounts,
-          num_readonly_unsigned_accounts:num_readonly_unsigned_accounts,
-        },
-        account_keys: account_keys, recent_blockhash: recent_blockhash, instructions: instructs
-      )
-     resp
+    def split_keys(unique_metas, signed_keys, unsigned_keys)
+      @num_required_signatures = 0
+      @num_readonly_signed_accounts = 0
+      @num_readonly_unsigned_accounts = 0
+      unique_metas.each do |meta|
+        if meta[:is_signer]
+          signed_keys.push(meta[:pubkey])
+          @num_required_signatures += 1
+          @num_readonly_signed_accounts += 1 if (!meta[:is_writable])
+        else
+          unsigned_keys.push(meta[:pubkey])
+          @num_readonly_unsigned_accounts += 1 if (!meta[:is_writable])
+        end
+      end
     end
 
     def partial_sign(message, keys)
