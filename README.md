@@ -332,3 +332,74 @@ The following methods are supported by the SolanaRuby::WebSocketClient:
 
 Several methods have optional parameters where default options are defined in the client. These options can be customized or overridden when calling the methods, but if left unspecified, the client will use its internal defaults.
 
+## Transaction Helpers
+
+### Transfer SOL Between Accounts
+
+To transfer SOL (the native cryptocurrency of the Solana blockchain) from one account to another, follow these steps:
+
+#### Requirements:
+
+- Sender's private key (used to sign the transaction).
+- Receiver's public key (the destination account).
+- An initialized client to interact with the Solana blockchain.
+
+#### Example Usage:
+
+    require 'solana_ruby'
+
+    # Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
+    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+
+    # Fetch the recent blockhash
+    recent_blockhash = client.get_latest_blockhash["blockhash"]
+
+    # Generate or fetch the sender's keypair
+    # Option 1: Generate a new keypair
+    sender_keypair = SolanaRuby::Keypair.generate
+    # Option 2: Use an existing private key
+    # sender_keypair = SolanaRuby::Keypair.from_private_key("InsertPrivateKeyHere")
+    
+    sender_pubkey = sender_keypair[:public_key]
+
+
+    # Airdrop some lamports to the sender's account
+    lamports = 10 * 1_000_000_000
+    sleep(1)
+    result = client.request_airdrop(sender_pubkey, lamports)
+    puts "Solana Balance #{lamports} lamports added sucessfully for the public key: #{sender_pubkey}"
+    sleep(10)
+
+
+    # Generate or use an existing receiver's public key
+    # Option 1: Generate a new keypair for the receiver
+    receiver_keypair = SolanaRuby::Keypair.generate # generate receiver keypair
+    receiver_pubkey = receiver_keypair[:public_key]
+    # Option 2: Use an existing public key
+    # receiver_pubkey = 'InsertExistingPublicKeyHere'
+
+    transfer_lamports = 1 * 1_000_000
+    puts "Payer's full private key: #{sender_keypair[:full_private_key]}"
+    puts "Receiver's full private key: #{receiver_keypair[:full_private_key]}"
+    puts "Receiver's Public Key: #{receiver_keypair[:public_key]}"
+
+    # Create a new transaction
+    transaction = SolanaRuby::TransactionHelper.new_sol_transaction(
+      sender_pubkey,
+      receiver_pubkey,
+      transfer_lamports,
+      recent_blockhash
+    )
+
+    # Get the sender's private key (ensure it's a string)
+    private_key = sender_keypair[:private_key]
+    puts "Private key type: #{private_key.class}, Value: #{private_key.inspect}"
+
+    # Sign the transaction
+    signed_transaction = transaction.sign([sender_keypair])
+
+    # Send the transaction to the Solana network
+    sleep(5)
+    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+    puts "Response: #{response}"
+
