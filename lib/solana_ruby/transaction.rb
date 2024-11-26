@@ -1,3 +1,5 @@
+Dir[File.join(__dir__, 'data_types', '*.rb')].each { |file| require file }
+
 module SolanaRuby
   class Transaction
     require 'rbnacl'
