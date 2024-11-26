@@ -340,8 +340,9 @@ To transfer SOL (the native cryptocurrency of the Solana blockchain) from one ac
 
 #### Requirements:
 
-- Sender's private key (used to sign the transaction).
-- Receiver's public key (the destination account).
+- **Sender's Keypair:** Either generate a new keypair or provide the private key for an existing sender account. This keypair is used to sign the transaction.
+- **Receiver's Public Key:** Specify the public key of the destination account. You can generate a new keypair for the receiver or use an existing public key.
+- **Airdrop Functionality:** For Devnet or Testnet transactions, ensure that the sender's account is funded with sufficient lamports using the Solana airdrop feature.
 - An initialized client to interact with the Solana blockchain.
 
 #### Example Usage:
