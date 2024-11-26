@@ -13,9 +13,6 @@ module SolanaRuby
         uint = UnsignedInt.new(32)
         numbers = divmod_int64(obj)
         numbers.map{|x| uint.serialize(x)}.flatten
-        # if @size && obj >= 256**@size
-        #   raise "Integer too large (does not fit in #{@size} bytes)"
-        # end
       end
 
       def deserialize(bytes)

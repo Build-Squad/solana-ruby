@@ -1,6 +1,7 @@
 module SolanaRuby
   class TransactionHelper
     require 'base58'
+    require 'pry'
 
     # Constants for program IDs
     SYSTEM_PROGRAM_ID = '11111111111111111111111111111111'
@@ -20,22 +21,23 @@ module SolanaRuby
       },
        # Create account layout
       create_account: {
-        lamports: :uint64,  # The amount of SOL to fund the new account
-        space: :uint64      # The space allocated for the new account (in bytes)
+        instruction: :uint8,
+        lamports: :uint64,
+        space: :uint64
       }
     }
 
     # Method to create a system account (e.g., for SPL token or SOL)
-    def self.create_account(from_pubkey, new_account_pubkey, lamports, space, program_id = SYSTEM_PROGRAM_ID)
-      data = encode_data(INSTRUCTION_LAYOUTS[:create_account], { lamports: lamports, space: space })
+    def self.create_account(from_pubkey, new_account_pubkey, lamports, space, owner_pubkey = SYSTEM_PROGRAM_ID)
+      instruction_data = encode_data(INSTRUCTION_LAYOUTS[:create_account], { instruction: 0, lamports: lamports, space: space })
       create_account_instruction = TransactionInstruction.new(
         keys: [
           { pubkey: from_pubkey, is_signer: true, is_writable: true },
           { pubkey: new_account_pubkey, is_signer: false, is_writable: true },
-          { pubkey: program_id, is_signer: false, is_writable: false }
+          { pubkey: owner_pubkey, is_signer: false, is_writable: false }
         ],
-        program_id: program_id,
-        data: data
+        program_id: owner_pubkey,
+        data: instruction_data.bytes
       )
       create_account_instruction
     end

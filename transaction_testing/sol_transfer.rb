@@ -1,29 +1,34 @@
 Dir[File.join(File.dirname(__dir__), 'lib/solana_ruby/*.rb')].each { |file| require file }
 Dir[File.join(File.dirname(__dir__), 'lib/solana_ruby/**/*.rb')].each { |file| require file }
 require 'pry'
-# Testing Script
 
+# SOL Transfer Testing Script
+
+# Initialize the Solana client
 client = SolanaRuby::HttpClient.new('http://127.0.0.1:8899')
 
 # Fetch the recent blockhash
 recent_blockhash = client.get_latest_blockhash["blockhash"]
 
-# Generate a sender keypair and public key
+# Generate a sender keypair and public key or Fetch payers keypair using private key
+# sender_keypair = SolanaRuby::Keypair.from_private_key("InsertPrivateKeyHere")
 sender_keypair = SolanaRuby::Keypair.generate
 sender_pubkey = sender_keypair[:public_key]
-lamports = 10 * 1_000_000_000
+
 
 # Airdrop some lamports to the sender's account
+lamports = 10 * 1_000_000_000
 sleep(1)
 result = client.request_airdrop(sender_pubkey, lamports)
 puts "Solana Balance #{lamports} lamports added sucessfully for the public key: #{sender_pubkey}"
 sleep(10)
-puts "sender account balance: #{client.get_balance(sender_pubkey)}, wait for few seconds to update the balance in solana when the balance shows 0"
 
 
-# Generate a receiver keypair and public key
-keypair = SolanaRuby::Keypair.generate
+# Generate or existing receiver keypair and public key
+keypair = SolanaRuby::Keypair.generate # generate receiver keypair
 receiver_pubkey = keypair[:public_key]
+# receiver_pubkey = 'InsertExistingPublicKeyHere' 
+
 transfer_lamports = 1 * 1_000_000
 puts "Payer's full private key: #{sender_keypair[:full_private_key]}"
 puts "Receiver's full private key: #{keypair[:full_private_key]}"
