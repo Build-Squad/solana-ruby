@@ -342,7 +342,7 @@ To transfer SOL (the native cryptocurrency of the Solana blockchain) from one ac
 
 - **Sender's Keypair:** Either generate a new keypair or provide the private key for an existing sender account. This keypair is used to sign the transaction.
 - **Receiver's Public Key:** Specify the public key of the destination account. You can generate a new keypair for the receiver or use an existing public key.
-- **Airdrop Functionality:** For Devnet or Testnet transactions, ensure that the sender's account is funded with sufficient lamports using the Solana airdrop feature.
+- **Airdrop Functionality:** For Mainnet, Devnet, or Testnet transactions, ensure that the sender's account is funded with sufficient lamports using the Solana airdrop feature.
 - An initialized client to interact with the Solana blockchain.
 
 #### Example Usage:
@@ -364,7 +364,7 @@ To transfer SOL (the native cryptocurrency of the Solana blockchain) from one ac
     sender_pubkey = sender_keypair[:public_key]
 
 
-    # Airdrop some lamports to the sender's account
+    # Airdrop some lamports to the sender's account when needed.
     lamports = 10 * 1_000_000_000
     sleep(1)
     result = client.request_airdrop(sender_pubkey, lamports)
@@ -374,7 +374,7 @@ To transfer SOL (the native cryptocurrency of the Solana blockchain) from one ac
 
     # Generate or use an existing receiver's public key
     # Option 1: Generate a new keypair for the receiver
-    receiver_keypair = SolanaRuby::Keypair.generate # generate receiver keypair
+    receiver_keypair = SolanaRuby::Keypair.generate
     receiver_pubkey = receiver_keypair[:public_key]
     # Option 2: Use an existing public key
     # receiver_pubkey = 'InsertExistingPublicKeyHere'

@@ -116,15 +116,17 @@ module SolanaRuby
     def compile_message
       check_for_errors
       fetch_message_data
-      message = Message.new(
-        header: {
-          num_required_signatures: @num_required_signatures,
-          num_readonly_signed_accounts: @num_readonly_signed_accounts,
-          num_readonly_unsigned_accounts: @num_readonly_unsigned_accounts,
-        },
-        account_keys: @account_keys, recent_blockhash: recent_blockhash, instructions: @instructs
+
+      # add instruction structure
+      instructs = add_instructs
+      
+      message_data = Message.new(
+        header: @header,
+        account_keys: @account_keys,
+        recent_blockhash: recent_blockhash,
+        instructions: instructs
       )
-     message
+     message_data
     end
 
     def check_for_errors
@@ -170,11 +172,8 @@ module SolanaRuby
       # Split out signing from non-signing keys and count header values
       signed_keys = []
       unsigned_keys = []
-      header_params = split_keys(unique_metas, signed_keys, unsigned_keys)
+      @header = split_keys(unique_metas, signed_keys, unsigned_keys)
       @account_keys = signed_keys + unsigned_keys
-      
-      # add instruction structure
-      @instructs = add_instructs
     end
 
     def append_program_id(program_ids, account_metas)
@@ -247,19 +246,24 @@ module SolanaRuby
     end
 
     def split_keys(unique_metas, signed_keys, unsigned_keys)
-      @num_required_signatures = 0
-      @num_readonly_signed_accounts = 0
-      @num_readonly_unsigned_accounts = 0
+      num_required_signatures = 0
+      num_readonly_signed_accounts = 0
+      num_readonly_unsigned_accounts = 0
       unique_metas.each do |meta|
         if meta[:is_signer]
           signed_keys.push(meta[:pubkey])
-          @num_required_signatures += 1
-          @num_readonly_signed_accounts += 1 if (!meta[:is_writable])
+          num_required_signatures += 1
+          num_readonly_signed_accounts += 1 if (!meta[:is_writable])
         else
           unsigned_keys.push(meta[:pubkey])
-          @num_readonly_unsigned_accounts += 1 if (!meta[:is_writable])
+          num_readonly_unsigned_accounts += 1 if (!meta[:is_writable])
         end
       end
+      {
+        num_required_signatures: num_required_signatures,
+        num_readonly_signed_accounts: num_readonly_signed_accounts,
+        num_readonly_unsigned_accounts: num_readonly_unsigned_accounts,
+      }
     end
 
     def partial_sign(message, keys)
