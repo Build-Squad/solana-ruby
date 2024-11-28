@@ -404,3 +404,62 @@ To transfer SOL (the native cryptocurrency of the Solana blockchain) from one ac
     response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
     puts "Response: #{response}"
 
+### Account Creation
+
+The create_account helper allows creating a new account with specified parameters. This is commonly used to set up accounts for tokens, programs, or other allocations on the Solana blockchain.
+
+#### Requirements:
+
+- **Payer Public key**: The public key of the account funding the creation.
+- **New Account Public Key**: The public key of the account to be created.
+- **Lamports**: The amount of lamports to transfer to the new account.
+- **Space**: The amount of space (in bytes) to allocate for the new account.
+- **Recent Blockhash**: The latest blockhash for the transaction.
+- **Program Id**: The program ID associated with the new account (default: System Program).
+
+#### Example Usage:
+
+    require 'solana_ruby'
+
+    # Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
+    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+
+    # Fetch the recent blockhash
+    recent_blockhash = client.get_latest_blockhash["blockhash"]
+
+    # Generate or fetch the sender/payer keypair
+    # Option 1: Generate a new keypair
+    sender_keypair = SolanaRuby::Keypair.generate
+    # Option 2: Use an existing private key
+    # sender_keypair = SolanaRuby::Keypair.from_private_key("InsertPrivateKeyHere")
+    sender_pubkey = sender_keypair[:public_key]
+
+    # Generate new account keypair 
+    new_account = SolanaRuby::Keypair.generate
+    new_account_pubkey = new_account[:public_key]
+
+    # Parameters for account creation
+    lamports = 1_000_000_000
+    space = 165
+    program_id = SolanaRuby::TransactionHelper::SYSTEM_PROGRAM_ID
+
+    # Create the account creation transaction
+    transaction = SolanaRuby::TransactionHelper.create_account(
+      sender_pubkey,
+      new_account_pubkey,
+      lamports,
+      space,
+      recent_blockhash,
+      program_id
+    )
+
+    # Sign with both keypairs
+    transaction.sign([sender_keypair, new_account])
+
+    # Send the transaction
+    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+
+    # Output transaction results
+    puts "Transaction Signature: #{response}"
+    puts "New account created with Public Key: #{new_account_pubkey}"
+
