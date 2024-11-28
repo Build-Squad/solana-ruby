@@ -3,30 +3,55 @@
 Dir[File.join(File.dirname(__dir__), 'lib/solana_ruby/*.rb')].each { |file| require file }
 Dir[File.join(File.dirname(__dir__), 'lib/solana_ruby/**/*.rb')].each { |file| require file }
 
-# Testing Script
-
+# Initialize Solana client
 client = SolanaRuby::HttpClient.new('http://127.0.0.1:8899')
 
 # Fetch the recent blockhash
 recent_blockhash = client.get_latest_blockhash["blockhash"]
+puts "Recent Blockhash: #{recent_blockhash}"
 
-# Generate a sender keypair and public key
-sender_keypair = SolanaRuby::Keypair.from_private_key("d22867a84ee1d91485a52c587793002dcaa7ce79a58bb605b3af2682099bb778")
+# Sender keypair and public key
+private_key = "d22867a84ee1d91485a52c587793002dcaa7ce79a58bb605b3af2682099bb778"
+sender_keypair = SolanaRuby::Keypair.from_private_key(private_key)
 sender_pubkey = sender_keypair[:public_key]
-lamports = 1 * 1_000_000_000
-space = 165
+puts "Sender Public Key: #{sender_pubkey}"
+
+# Check sender's account balance
 balance = client.get_balance(sender_pubkey)
-puts "sender account balance: #{balance}, wait for few seconds to update the balance in solana when the balance 0"
+puts "Sender account balance: #{balance} lamports"
+if balance == 0
+  puts "Balance is zero, waiting for balance update..."
+  sleep(10)
+end
 
-
-# Generate a receiver keypair and public key
+# new keypair and public key (new account)
 new_account = SolanaRuby::Keypair.generate
 new_account_pubkey = new_account[:public_key]
+puts "New Account Public Key: #{new_account_pubkey}"
 
-# create a transaction instruction
-transaction = SolanaRuby::TransactionHelper.create_and_sign_transaction(sender_pubkey, new_account_pubkey, lamports, space, recent_blockhash)
+# Parameters for account creation
+lamports = 1 * 1_000_000_000 # Lamports to transfer
+space = 165 # Space allocation (bytes)
+program_id = SolanaRuby::TransactionHelper::SYSTEM_PROGRAM_ID
 
-signed_transaction = transaction.sign([sender_keypair])
-sleep(5)
+# Create and sign the transaction
+transaction = SolanaRuby::TransactionHelper.create_account(
+  sender_pubkey,
+  new_account_pubkey,
+  lamports,
+  space,
+  recent_blockhash,
+  program_id
+)
+
+# Sign transaction with both sender and new account keypairs
+transaction.sign([sender_keypair, new_account])
+
+# Send the transaction
+puts "Sending transaction..."
 response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
-puts "Response: #{response}"
+
+# Output transaction results
+puts "Transaction Signature: #{response}"
+puts "New account created successfully with Public Key: #{new_account_pubkey}"
+

@@ -385,7 +385,7 @@ To transfer SOL (the native cryptocurrency of the Solana blockchain) from one ac
     puts "Receiver's Public Key: #{receiver_keypair[:public_key]}"
 
     # Create a new transaction
-    transaction = SolanaRuby::TransactionHelper.new_sol_transaction(
+    transaction = SolanaRuby::TransactionHelper.sol_transfer(
       sender_pubkey,
       receiver_pubkey,
       transfer_lamports,

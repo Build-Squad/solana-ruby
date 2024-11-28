@@ -72,10 +72,10 @@ module SolanaRuby
       instructions.push(item)
     end
 
-    def sign(keys)
-      raise 'No signers' unless keys.any?
+    def sign(keypairs)
+      raise 'No signers' unless keypairs.any?
 
-      keys = keys.uniq{ |k| key[:public_key] }
+      keys = keypairs.uniq { |kp| kp[:public_key] }
       @signatures = keys.map do |key|
         {
           signature: nil,

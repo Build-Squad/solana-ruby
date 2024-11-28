@@ -21,5 +21,9 @@ module SolanaRuby
     def blob1
       Blob.new(1)
     end
+
+    def blob32
+      Blob.new(32)
+    end
   end
 end
