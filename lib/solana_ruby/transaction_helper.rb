@@ -6,7 +6,9 @@ module SolanaRuby
     # Constants for program IDs
     SYSTEM_PROGRAM_ID = '11111111111111111111111111111111'
     TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-    ASSOCIATED_TOKEN_PROGRAM_ID = 'ATokenGP3evbxxpQ7bYPLNNaxD2c4bqtvWjpKbmz6HjH'
+    ASSOCIATED_TOKEN_PROGRAM_ID = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+    SYSVAR_RENT_ID = 'SysvarRent111111111111111111111111111111111'
+
 
     INSTRUCTION_LAYOUTS = {
       # Native SOL transfer
@@ -119,22 +121,38 @@ module SolanaRuby
       transaction
     end
 
-    # Method to create an associated token account for a given token mint
-    def self.create_associated_token_account(payer, mint, owner)
-      data = [0, 0, 0, 0]  # No data required for account creation
+    # Method to create an associated token account
+    def self.create_associated_token_account(payer, mint, owner, recent_blockhash, program_id = SYSTEM_PROGRAM_ID)
+      transaction = Transaction.new
+      transaction.set_fee_payer(payer)  # Payer funds the transaction
+      transaction.set_recent_blockhash(recent_blockhash)
+
+      # Derive the associated token account address
+      associated_token_account_pubkey = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint, owner, program_id)
+
+      # Create the associated token account instruction
       create_account_instruction = TransactionInstruction.new(
         keys: [
-          { pubkey: payer, is_signer: true, is_writable: true },
-          { pubkey: associated_token, is_signer: false, is_writable: true },
-          { pubkey: owner, is_signer: false, is_writable: false },
-          { pubkey: mint, is_signer: false, is_writable: false },
-          { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, is_signer: false, is_writable: false },
-          { pubkey: SYSTEM_PROGRAM_ID, is_signer: false, is_writable: false }
+          { pubkey: payer, is_signer: true, is_writable: true },                 # Payer account
+          { pubkey: associated_token_account_pubkey, is_signer: false, is_writable: true },  # New ATA
+          { pubkey: owner, is_signer: false, is_writable: false },               # Owner of the ATA
+          { pubkey: mint, is_signer: false, is_writable: false },                # Token mint
+          { pubkey: SYSTEM_PROGRAM_ID, is_signer: false, is_writable: false },   # System program
+          { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false },   # Token program
+          { pubkey: SYSVAR_RENT_ID, is_signer: false, is_writable: false }
         ],
         program_id: ASSOCIATED_TOKEN_PROGRAM_ID,
-        data: data
+        data: []  # No data required for creating an associated token account
       )
-      create_account_instruction
+
+      # Add the instruction to the transaction
+      transaction.add_instruction(create_account_instruction)
+      transaction
+    end
+
+    # Derive the associated token account address
+    def self.get_associated_token_address(mint, owner, program_id)
+      SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint, owner, program_id)
     end
 
     # Utility to encode data using predefined layouts

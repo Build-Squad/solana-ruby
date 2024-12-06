@@ -1,4 +1,5 @@
 Dir[File.join(__dir__, 'data_types', '*.rb')].each { |file| require file }
+Dir[File.join(__dir__, 'transaction_helpers', '*.rb')].each { |file| require file }
 
 module SolanaRuby
   class Transaction
