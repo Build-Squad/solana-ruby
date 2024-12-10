@@ -15,8 +15,8 @@ payer = SolanaRuby::Keypair.load_keypair('/Users/chinaputtaiahbellamkonda/.confi
 payer_pubkey = payer[:public_key]
 
 # Generate a sender keypair and public key
-# owner = SolanaRuby::Keypair.generate
-owner = SolanaRuby::Keypair.from_private_key("13e52cf468cafc463e6d0f49693dec4857eccc33492fae8b3ac48aacbef66599")
+owner = SolanaRuby::Keypair.generate
+# owner = SolanaRuby::Keypair.from_private_key("2ce523e98cfd207a216a9ac4ef8b41c38c53a302af2022d2e89e1256d1b6a1d0")
 owner_pubkey = owner[:public_key]
 puts "owner public key: #{owner_pubkey}"
 puts "payer private key: #{owner[:private_key]}"
@@ -29,7 +29,7 @@ puts "payer private key: #{owner[:private_key]}"
 # sleep(10)
 
 
-mint_pubkey = "38xBx1QjfUmnqoGauutmzXyPc4SakAeY53zEYJfaXiNe"
+mint_pubkey = "5xxFuuvLiB6Gz3vbaqgkjf8fvEDXowftFiL14qUSgPiM"
 program_id = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
 puts "payer public key: #{payer_pubkey}"
 
@@ -38,8 +38,6 @@ puts "payer public key: #{payer_pubkey}"
 # puts "Associated Token Address: #{associated_token_address}"
 
 transaction = SolanaRuby::TransactionHelper.create_associated_token_account(payer_pubkey, mint_pubkey, owner_pubkey, recent_blockhash)
-
-puts "create_account_instruction:=== #{transaction}"
 
 resp = transaction.sign([payer])
 

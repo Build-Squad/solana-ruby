@@ -128,8 +128,10 @@ module SolanaRuby
       transaction.set_recent_blockhash(recent_blockhash)
 
       # Derive the associated token account address
-      associated_token_account_pubkey = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint, owner, program_id)
+      associated_token_account_pubkey = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint, owner)
+      puts "associated_token_account_pubkey: #{associated_token_account_pubkey}"
 
+      
       # Create the associated token account instruction
       create_account_instruction = TransactionInstruction.new(
         keys: [
