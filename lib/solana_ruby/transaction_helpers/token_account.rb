@@ -26,6 +26,19 @@ module SolanaRuby
         Base58.binary_to_base58(associated_token_account_pubkey, :bitcoin)
       end
 
+      def self.add_signers(keys, owner_or_authority, multi_signers)
+        if multi_signers.any?
+          keys.push({ pubkey: owner_or_authority, is_signer: false, is_writable: false })
+          multi_signers.each do |signer|
+            pubkey = signer.is_a?(String) ? signer : signer.public_key
+            keys.push({ pubkey: pubkey, is_signer: true, is_writable: false })
+          end
+        else
+          keys.push({ pubkey: owner_or_authority, is_signer: true, is_writable: false })
+        end
+        keys
+      end
+
       private
 
       def self.find_program_address(seeds, program_id)
