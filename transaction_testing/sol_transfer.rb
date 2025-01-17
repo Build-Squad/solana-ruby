@@ -1,6 +1,6 @@
 Dir[File.join(File.dirname(__dir__), 'lib/solana_ruby/*.rb')].each { |file| require file }
 Dir[File.join(File.dirname(__dir__), 'lib/solana_ruby/**/*.rb')].each { |file| require file }
-require 'pry'
+# require 'pry'
 
 # SOL Transfer Testing Script
 

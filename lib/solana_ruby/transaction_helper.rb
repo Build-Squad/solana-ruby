@@ -1,7 +1,6 @@
 module SolanaRuby
   class TransactionHelper
     require 'base58'
-    require 'pry'
 
     # Constants for program IDs
     SYSTEM_PROGRAM_ID = '11111111111111111111111111111111'
