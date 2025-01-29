@@ -42,6 +42,10 @@ module SolanaRuby
       spl_burn: {
         instruction: :uint8,
         amount: :uint64
+      },
+      # Close account layout (added here)
+      close_account: {
+        instruction: :uint8
       }
     }
 
@@ -79,6 +83,41 @@ module SolanaRuby
       transaction.add_instruction(instruction)
       
       # return the transaction for signing
+      transaction
+    end
+
+    # Method to create a close account instruction
+    def self.close_account_instruction(payer, account_to_close_pubkey, destination_pubkey, owner_pubkey)
+      # Encode the instruction data
+      instruction_data = encode_data(
+        INSTRUCTION_LAYOUTS[:close_account],
+        { instruction: 9 } # Close account instruction number is 9
+      )
+
+      # Set up the keys for the close account instruction
+      keys = [
+        { pubkey: account_to_close_pubkey, is_signer: false, is_writable: true },
+        { pubkey: destination_pubkey, is_signer: false, is_writable: true },
+        { pubkey: owner_pubkey, is_signer: true, is_writable: false },
+        { pubkey: payer, is_signer: true, is_writable: true }
+      ]
+
+      # Return the instruction
+      create_instruction(keys, instruction_data, SYSTEM_PROGRAM_ID)
+    end
+
+    # Method to close an account (helper)
+    def self.close_account(from_pubkey, account_to_close_pubkey, destination_pubkey, owner_pubkey, recent_blockhash)
+      # Create the transaction
+      transaction = Transaction.new
+      transaction.set_fee_payer(from_pubkey)
+      transaction.set_recent_blockhash(recent_blockhash)
+
+      # Add the close account instruction to the transaction
+      instruction = close_account_instruction(from_pubkey, account_to_close_pubkey, destination_pubkey, owner_pubkey)
+      transaction.add_instruction(instruction)
+
+      # Return the transaction for signing
       transaction
     end
 
@@ -230,10 +269,10 @@ module SolanaRuby
       layout.deserialize(data)
     end
 
-    def self.create_instruction(keys, data, toke_program_id = TOKEN_PROGRAM_ID)
+    def self.create_instruction(keys, data, token_program_id = TOKEN_PROGRAM_ID)
       TransactionInstruction.new(
         keys: keys,
-        program_id: toke_program_id,
+        program_id: token_program_id,
         data: data
       )
     end
