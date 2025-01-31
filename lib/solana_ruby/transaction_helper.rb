@@ -87,34 +87,33 @@ module SolanaRuby
     end
 
     # Method to create a close account instruction
-    def self.close_account_instruction(payer, account_to_close_pubkey, destination_pubkey, owner_pubkey)
+    def self.close_account_instruction( account_to_close, destination, owner, payer, multi_signers)
       # Encode the instruction data
       instruction_data = encode_data(
         INSTRUCTION_LAYOUTS[:close_account],
         { instruction: 9 } # Close account instruction number is 9
       )
 
+      signer = multi_signers.empty? ? payer : multi_signers
       # Set up the keys for the close account instruction
-      keys = [
-        { pubkey: account_to_close_pubkey, is_signer: false, is_writable: true },
-        { pubkey: destination_pubkey, is_signer: false, is_writable: true },
-        { pubkey: owner_pubkey, is_signer: true, is_writable: false },
-        { pubkey: payer, is_signer: true, is_writable: true }
-      ]
+      keys = SolanaRuby::TransactionHelpers::TokenAccount.add_signers(
+        [{ pubkey: account_to_close, is_signer: false, is_writable: true },
+          { pubkey: destination, is_signer: false, is_writable: true }],
+          owner, signer)
 
       # Return the instruction
-      create_instruction(keys, instruction_data, SYSTEM_PROGRAM_ID)
+      create_instruction(keys, instruction_data)
     end
 
     # Method to close an account (helper)
-    def self.close_account(from_pubkey, account_to_close_pubkey, destination_pubkey, owner_pubkey, recent_blockhash)
+    def self.close_account(account_to_close, destination, owner, payer, multi_signers, recent_blockhash)
       # Create the transaction
       transaction = Transaction.new
-      transaction.set_fee_payer(from_pubkey)
+      transaction.set_fee_payer(payer)
       transaction.set_recent_blockhash(recent_blockhash)
 
       # Add the close account instruction to the transaction
-      instruction = close_account_instruction(from_pubkey, account_to_close_pubkey, destination_pubkey, owner_pubkey)
+      instruction = close_account_instruction(account_to_close, destination, owner, payer, multi_signers)
       transaction.add_instruction(instruction)
 
       # Return the transaction for signing

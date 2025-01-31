@@ -27,7 +27,7 @@ module SolanaRuby
       end
 
       def self.add_signers(keys, owner_or_authority, multi_signers)
-        if multi_signers.any?
+        if multi_signers.is_a?(Array) && multi_signers.any?
           keys.push({ pubkey: owner_or_authority, is_signer: false, is_writable: false })
           multi_signers.each do |signer|
             pubkey = signer.is_a?(String) ? signer : signer.public_key
