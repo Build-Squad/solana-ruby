@@ -485,7 +485,7 @@ The create_associated_token_account helper allows you to create an associated to
     recent_blockhash = client.get_latest_blockhash["blockhash"]
 
     # Load the keypair for the payer
-    payer_keypair = SolanaRuby::Keypair.load_keypair('/Users/username/.config/solana/id.json')
+    payer_keypair = SolanaRuby::Keypair.load_keypair('InsertYourJsonFilePathHere')
     payer_pubkey = payer_keypair.public_key
 
     # Generate or load the owner keypair
@@ -543,7 +543,7 @@ The mint_spl_tokens helper allows you to mint new SPL tokens to a specified dest
     destination_account = "InsertDestinationPublicKeyHere"
 
     # Load the mint authority keypair
-    mint_authority = SolanaRuby::Keypair.load_keypair('/Users/username/.config/solana/id.json')
+    mint_authority = SolanaRuby::Keypair.load_keypair('InsertYourJsonFilePathHere')
 
     puts "Mint Authority Public Key: #{mint_authority[:public_key]}"
 
