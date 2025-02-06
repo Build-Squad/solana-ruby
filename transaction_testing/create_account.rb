@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+# require 'pry'
 Dir[File.join(File.dirname(__dir__), 'lib/solana_ruby/*.rb')].each { |file| require file }
 Dir[File.join(File.dirname(__dir__), 'lib/solana_ruby/**/*.rb')].each { |file| require file }
 
@@ -11,8 +11,9 @@ recent_blockhash = client.get_latest_blockhash["blockhash"]
 puts "Recent Blockhash: #{recent_blockhash}"
 
 # Sender keypair and public key
-private_key = "d22867a84ee1d91485a52c587793002dcaa7ce79a58bb605b3af2682099bb778"
-sender_keypair = SolanaRuby::Keypair.from_private_key(private_key)
+# private_key = "d22867a84ee1d91485a52c587793002dcaa7ce79a58bb605b3af2682099bb778"
+# sender_keypair = SolanaRuby::Keypair.from_private_key(private_key)
+sender_keypair = SolanaRuby::Keypair.load_keypair('/Users/chinaputtaiahbellamkonda/.config/solana/id.json')
 sender_pubkey = sender_keypair[:public_key]
 puts "Sender Public Key: #{sender_pubkey}"
 
@@ -28,6 +29,8 @@ end
 new_account = SolanaRuby::Keypair.generate
 new_account_pubkey = new_account[:public_key]
 puts "New Account Public Key: #{new_account_pubkey}"
+puts "New Account Private Key: #{new_account[:private_key]}"
+puts "New Account Full Private Key: #{new_account[:full_private_key]}"
 
 # Parameters for account creation
 lamports = 1 * 1_000_000_000 # Lamports to transfer

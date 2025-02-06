@@ -463,3 +463,328 @@ The create_account helper allows creating a new account with specified parameter
     puts "Transaction Signature: #{response}"
     puts "New account created with Public Key: #{new_account_pubkey}"
 
+### SPL Token Account Creation
+
+The create_associated_token_account helper allows you to create an associated token account for a specific mint and owner. This is necessary when dealing with SPL tokens on the Solana blockchain.
+
+#### Requirements:
+
+- **Payer Public key**: The public key of the account funding the creation.
+- **Mint Public Key**: The public key of the SPL token mint.
+- **Owner Public Key**: The public key of the owner for whom the associated token account is being created.
+- **Recent Blockhash**: The latest blockhash for the transaction.
+
+#### Example Usage:
+
+    require 'solana_ruby'
+
+    # Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
+    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+
+    # Fetch the recent blockhash
+    recent_blockhash = client.get_latest_blockhash["blockhash"]
+
+    # Load the keypair for the payer
+    payer_keypair = SolanaRuby::Keypair.load_keypair('InsertYourJsonFilePathHere')
+    payer_pubkey = payer_keypair.public_key
+
+    # Generate or load the owner keypair
+    owner_keypair = SolanaRuby::Keypair.generate
+    owner_pubkey = owner_keypair.public_key
+
+    puts "Owner Public Key: #{owner_pubkey}"
+    puts "Owner Private Key: #{owner_keypair.private_key}"
+
+    # Define the mint public key for the SPL token
+    mint_pubkey = "InsertMintPublicKeyHere"
+
+    # Create the associated token account transaction
+    transaction = SolanaRuby::TransactionHelper.create_associated_token_account(
+      payer_pubkey,
+      mint_pubkey,
+      owner_pubkey,
+      recent_blockhash
+    )
+
+    # Sign the transaction
+    transaction.sign([payer_keypair])
+
+    # Send the transaction
+    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+
+    # Output transaction results
+    puts "Transaction Signature: #{response}"
+
+### Close Account
+
+The close_account helper allows you to close an associated token account on the Solana blockchain. Any remaining balance in the account is transferred to the specified destination account.
+
+#### Requirements:
+
+- **Account to Close**: The public key of the associated token account to be closed.
+- **Destination Public Key**: The public key of the account receiving the remaining balance.
+- **Owner Public Key**: The public key of the account owner who has permission to close the account.
+- **Payer Public Key**: The public key of the account paying for the transaction fees.
+- **Multi-Signers (Optional)**: An array of additional signer public keys if the account requires multiple signatures.
+- **Recent Blockhash**: The latest blockhash for the transaction.
+
+#### Example Usage:
+
+    require 'solana_ruby'
+
+    # Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
+    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+
+    # Fetch the recent blockhash
+    recent_blockhash = client.get_latest_blockhash["blockhash"]
+
+    # Load the keypairs
+    payer_keypair = SolanaRuby::Keypair.from_private_key("InsertPayerPrivateKeyHere")
+    owner_keypair = SolanaRuby::Keypair.from_private_key("InsertOwnerPrivateKeyHere")
+
+    payer_pubkey = payer_keypair[:public_key]
+    owner_pubkey = owner_keypair[:public_key]
+
+    # Define the associated token account to be closed and the destination account
+    account_to_close_pubkey = 'InsertAccountToClosePublicKeyHere'  # Replace with the actual account to close
+    destination_pubkey = 'InsertDestinationPublicKeyHere'  # Replace with the actual recipient address
+
+    # Multi-signers (if required)
+    # multi_signers = [SolanaRuby::Keypair.from_private_key("InsertAdditionalSignerPrivateKeyHere")]
+    multi_signers = []
+
+    # Extract public keys of multi-signers
+    multi_signer_pubkeys = multi_signers.map { |signer| signer[:public_key] }
+
+    # Create the close account transaction
+    transaction = SolanaRuby::TransactionHelper.close_account(
+      account_to_close_pubkey,
+      destination_pubkey,
+      owner_pubkey,
+      payer_pubkey,
+      multi_signer_pubkeys,
+      recent_blockhash
+    )
+
+    # Sign the transaction
+    transaction.sign([payer_keypair, owner_keypair])
+
+    # Send the transaction
+    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+
+    # Output transaction results
+    puts "Transaction Signature: #{response}"
+    puts "Closed account: #{account_to_close_pubkey}, funds sent to: #{destination_pubkey}"
+
+### Get Associated Token Address
+
+The get_associated_token_address helper fetches the associated token account for a given mint address and owner public key. This is essential when interacting with SPL tokens to determine where tokens are held.
+
+#### Requirements:
+
+- **Mint Address**: The public key of the SPL token mint.
+- **Owner Public Key**: The public key of the token holder.
+
+#### Example Usage:
+
+    require 'solana_ruby'
+
+    # Define mint address and owner public key
+    mint_address = 'InsertMintPublicKeyHere'
+    owner_pubkey = 'InsertOwnerPublicKeyHere'
+
+    # Fetch associated token address
+    associated_token_address = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(
+      mint_address,
+      owner_pubkey
+    )
+
+    puts "Associated Token Address: #{associated_token_address}"
+
+### Mint SPL Tokens
+
+The mint_spl_tokens helper allows you to mint new SPL tokens to a specified destination account. This is useful for token creators who need to distribute newly minted tokens.
+
+#### Requirements:
+
+- **Mint Account Public Key**: The public key of the mint account.
+- **Destination Account Public Key**: The associated token account where the newly minted tokens will be sent.
+- **Mint Authority Public Key**: The public key of the authority allowed to mint new tokens.
+- **Amount**: The number of tokens to mint (in the smallest unit, based on token decimals).
+- **Multi-Signers (Optional)**: Additional signer public keys if multi-signature authorization is required.
+- **Recent Blockhash**: The latest blockhash for the transaction.
+
+#### Example Usage:
+
+    require 'solana_ruby'
+
+    # Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
+    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+
+    # Fetch the recent blockhash
+    recent_blockhash = client.get_latest_blockhash["blockhash"]
+
+    # Define the mint account and recipient
+    mint_account = "InsertMintPublicKeyHere"
+    destination_account = "InsertDestinationPublicKeyHere"
+
+    # Load the mint authority keypair
+    mint_authority = SolanaRuby::Keypair.load_keypair('InsertYourJsonFilePathHere')
+
+    puts "Mint Authority Public Key: #{mint_authority[:public_key]}"
+
+    # Define the amount to mint (in smallest units)
+    amount = 1_000_000_00_00 # Adjust based on token decimals
+
+    # Multi-signers (if required)
+    multi_signers = [] # Example: [additional_signer_pubkey]
+
+    # Create the mint transaction
+    transaction = SolanaRuby::TransactionHelper.mint_spl_tokens(
+      mint_account,
+      destination_account,
+      mint_authority[:public_key],
+      amount,
+      recent_blockhash,
+      multi_signers
+    )
+
+    # Sign the transaction with the mint authority
+    transaction.sign([mint_authority])
+
+    # Send the transaction
+    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+
+    # Output transaction results
+    puts "Transaction Signature: #{response}"
+    puts "Minted #{amount} tokens to: #{destination_account}"
+
+### Burn SPL Tokens
+
+The burn_spl_tokens helper allows you to burn (destroy) a specified amount of SPL tokens from a token account. This is typically used to reduce the total supply of a token.
+
+#### Requirements:
+
+- **Token Account**: The associated token account holding the tokens to be burned..
+- **Mint Address**: The mint address of the SPL token.
+- **Owner**: The owner of the token account (must have authority to burn tokens).
+- **Amount**: The number of tokens to burn (denominated in the smallest units).
+- **Recent Blockhash**: The latest blockhash for the transaction.
+
+#### Example Usage:
+
+    require 'solana_ruby'
+
+    # Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
+    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+
+    # Fetch the recent blockhash
+    recent_blockhash = client.get_latest_blockhash["blockhash"]
+
+    # Define token account and mint address
+    token_account = "InsertTokenAccountPublicKeyHere"
+    mint_address = "InsertMintPublicKeyHere"
+
+    # Load the mint authority keypair
+    mint_authority = SolanaRuby::Keypair.load_keypair('/path/to/id.json')
+    owner = mint_authority[:public_key]
+
+    # Define the amount to burn
+    amount = 500_000 # Tokens to burn in smallest units
+
+    # Create burn transaction
+    transaction = SolanaRuby::TransactionHelper.burn_spl_tokens(
+      token_account,
+      mint_address,
+      owner,
+      amount,
+      recent_blockhash
+    )
+
+    # Sign the transaction
+    transaction.sign([mint_authority])
+
+    # Send the transaction
+    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+
+    # Output transaction results
+    puts "Transaction Signature: #{response}"
+
+### Transfer SPL Tokens
+
+The new_spl_token_transaction helper allows you to transfer SPL tokens from one associated token account to another.
+
+#### Requirements:
+
+- **Sender's Token Account**: The associated token account holding the tokens to be transferred.
+- **Mint Address**: The mint address of the SPL token.
+- **Receiver's Token Account**: The associated token account of the recipient.
+- **Fee Payer:**: The account responsible for transaction fees.
+- **Amount**: The number of tokens to mint (in the smallest unit, based on token decimals).
+- **Decimals**: The decimal precision of the SPL token (e.g., 9 for SOL-based tokens).
+- **Recent Blockhash**: The latest blockhash for the transaction.
+- **Multi-Signers (Optional)**: List of additional required signers (if applicable).
+
+#### Example Usage:
+
+    require 'solana_ruby'
+
+    # Initialize the Solana client
+    client = SolanaRuby::HttpClient.new('http://127.0.0.1:8899')
+
+    # Fetch the recent blockhash
+    recent_blockhash = client.get_latest_blockhash["blockhash"]
+
+    # Load the fee payer's keypair
+    fee_payer = SolanaRuby::Keypair.from_private_key('InsertFeePayerPrivateKeyHere')
+    fee_payer_pubkey = fee_payer[:public_key]
+
+    # Define the SPL token mint address
+    mint_address = 'InsertMintPublicKeyHere'
+
+    # Define sender and receiver public keys
+    sender_pubkey = 'InsertSenderPublicKeyHere'
+    receiver_pubkey = 'InsertReceiverPublicKeyHere'
+
+    # Fetch the associated token accounts
+    senders_token_account = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint_address, sender_pubkey)
+    receivers_token_account = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint_address, receiver_pubkey)
+
+    puts "Sender's Token Account: #{senders_token_account}"
+    puts "Receiver's Token Account: #{receivers_token_account}"
+
+    # Define the transfer amount and decimals
+    transfer_lamports = 1_000_000 # Amount in smallest units
+    decimals = 9 # Adjust based on token precision
+
+    # Multi-signers (Optional, default is an empty array)
+    # multi_signers = [
+    #  SolanaRuby::Keypair.from_private_key('InsertMultiSigner1PrivateKeyHere'),
+    #  SolanaRuby::Keypair.from_private_key('InsertMultiSigner2PrivateKeyHere')
+    # ]
+    # multi_signer_pubkeys = multi_signers.map { |signer| signer[:public_key] }
+    multi_signers = []
+
+    # Create the transaction
+    transaction = SolanaRuby::TransactionHelper.new_spl_token_transaction(
+      senders_token_account,
+      mint_address,
+      receivers_token_account,
+      fee_payer_pubkey,
+      transfer_lamports,
+      decimals,
+      recent_blockhash,
+      multi_signer_pubkeys
+    )
+
+    # Sign the transaction (Only fee payer, unless multi-signers are provided)
+    transaction.sign([fee_payer] + multi_signers)
+
+    # Send the transaction
+    puts "Sending transaction..."
+    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+
+    # Output transaction results
+    puts "Transaction Signature: #{response}"
+
+

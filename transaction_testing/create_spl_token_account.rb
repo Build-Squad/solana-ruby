@@ -16,10 +16,11 @@ payer_pubkey = payer[:public_key]
 
 # Generate a sender keypair and public key
 owner = SolanaRuby::Keypair.generate
-# owner = SolanaRuby::Keypair.from_private_key("2ce523e98cfd207a216a9ac4ef8b41c38c53a302af2022d2e89e1256d1b6a1d0")
+# owner = SolanaRuby::Keypair.from_private_key("4b9a36383e12d13581c37a50c38a00d91ae0e80f3ce25de852ea61f499102a33")
 owner_pubkey = owner[:public_key]
 puts "owner public key: #{owner_pubkey}"
-puts "payer private key: #{owner[:private_key]}"
+puts "owner private key: #{owner[:private_key]}"
+puts "owner full private key: #{owner[:full_private_key]}"
 
 # Airdrop some lamports to the sender's account
 # lamports = 10 * 1_000_000_000
@@ -29,7 +30,7 @@ puts "payer private key: #{owner[:private_key]}"
 # sleep(10)
 
 
-mint_pubkey = "5xxFuuvLiB6Gz3vbaqgkjf8fvEDXowftFiL14qUSgPiM"
+mint_pubkey = "InsertMintPublicKeyHere"
 program_id = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
 puts "payer public key: #{payer_pubkey}"
 

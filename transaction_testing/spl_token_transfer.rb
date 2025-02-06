@@ -13,7 +13,7 @@ client = SolanaRuby::HttpClient.new('http://127.0.0.1:8899')
 recent_blockhash = client.get_latest_blockhash["blockhash"]
 
 # Generate a sender keypair and public key
-fee_payer = SolanaRuby::Keypair.load_keypair('/Users/chinaputtaiahbellamkonda/.config/solana/id.json')
+fee_payer = SolanaRuby::Keypair.from_private_key('e06f61b73aa625690ef97ed3704e8dc22bc835092e94cc9ae5650b516f26c91a')
 fee_payer_pubkey = fee_payer[:public_key]
 lamports = 10 * 1_000_000_000
 space = 165
@@ -24,23 +24,24 @@ puts "sender account balance: #{balance}, wait for few seconds to update the bal
 
 
 # # Generate a receiver keypair and public key
-keypair = SolanaRuby::Keypair.generate
+keypair = SolanaRuby::Keypair.from_private_key('f7173083807e1692e844aa2ec515eca18d016fc5e4468be75be20f6093de6641')
 receiver_pubkey = keypair[:public_key]
 transfer_lamports = 1_000_000
-# puts "Payer's full private key: #{sender_keypair[:full_private_key]}"
-# # puts "Receiver's full private key: #{keypair[:full_private_key]}"
-# # puts "Receiver's Public Key: #{keypair[:public_key]}"
-mint_address = 'G4JEi3UprH2rNz6hjBfQakLSR5EHXtS5Ry8MRFTQS5wG'
-token_program_id = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+mint_address = 'GDAWgGT42CqgaMds81JFVoqyJ4WBvfQsHAshPggAfXCM'
+
+senders_token_account = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint_address, fee_payer_pubkey)
+receivers_token_account = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint_address, receiver_pubkey)
+puts "senders_token_account: #{senders_token_account}"
+puts "receivers_token_account: #{receivers_token_account}"
 
 # Create a new transaction
 transaction = SolanaRuby::TransactionHelper.new_spl_token_transaction(
-  "86w17eQHEoBcHY2rTdd5q9LjJL6Rx9QE6J1C9xgGkjt",
+  senders_token_account,
   mint_address,
-  receiver_pubkey,
+  receivers_token_account,
   fee_payer_pubkey,
   transfer_lamports,
-  6,
+  9,
   recent_blockhash,
   []
 )

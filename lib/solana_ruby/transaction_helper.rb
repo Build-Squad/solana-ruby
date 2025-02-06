@@ -42,6 +42,10 @@ module SolanaRuby
       spl_burn: {
         instruction: :uint8,
         amount: :uint64
+      },
+      # Close account layout (added here)
+      close_account: {
+        instruction: :uint8
       }
     }
 
@@ -79,6 +83,40 @@ module SolanaRuby
       transaction.add_instruction(instruction)
       
       # return the transaction for signing
+      transaction
+    end
+
+    # Method to create a close account instruction
+    def self.close_account_instruction( account_to_close, destination, owner, payer, multi_signers)
+      # Encode the instruction data
+      instruction_data = encode_data(
+        INSTRUCTION_LAYOUTS[:close_account],
+        { instruction: 9 } # Close account instruction number is 9
+      )
+
+      signer = multi_signers.empty? ? payer : multi_signers
+      # Set up the keys for the close account instruction
+      keys = SolanaRuby::TransactionHelpers::TokenAccount.add_signers(
+        [{ pubkey: account_to_close, is_signer: false, is_writable: true },
+          { pubkey: destination, is_signer: false, is_writable: true }],
+          owner, signer)
+
+      # Return the instruction
+      create_instruction(keys, instruction_data)
+    end
+
+    # Method to close an account (helper)
+    def self.close_account(account_to_close, destination, owner, payer, multi_signers, recent_blockhash)
+      # Create the transaction
+      transaction = Transaction.new
+      transaction.set_fee_payer(payer)
+      transaction.set_recent_blockhash(recent_blockhash)
+
+      # Add the close account instruction to the transaction
+      instruction = close_account_instruction(account_to_close, destination, owner, payer, multi_signers)
+      transaction.add_instruction(instruction)
+
+      # Return the transaction for signing
       transaction
     end
 
@@ -230,10 +268,10 @@ module SolanaRuby
       layout.deserialize(data)
     end
 
-    def self.create_instruction(keys, data, toke_program_id = TOKEN_PROGRAM_ID)
+    def self.create_instruction(keys, data, token_program_id = TOKEN_PROGRAM_ID)
       TransactionInstruction.new(
         keys: keys,
-        program_id: toke_program_id,
+        program_id: token_program_id,
         data: data
       )
     end
