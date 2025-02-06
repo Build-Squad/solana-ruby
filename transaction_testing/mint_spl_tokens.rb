@@ -12,10 +12,13 @@ client = SolanaRuby::HttpClient.new('http://127.0.0.1:8899')
 recent_blockhash = client.get_latest_blockhash["blockhash"]
 
 # Example parameters
-mint_account = "5FQhi6Kq3CKDaB3bus21ZqcL7wyeZNR18otFGoDfrZXU"
-destination_account = "C2wY5TKnj52S4s9yRUTNqitRe5gmFokSCoppJS6t63aa"
+mint_account = "2DoNkK31X9HH5MXY6pBeb3RDZ1ZDK7wgXrcvnyipXNvf"
+destination_account = "DCm6PCsdRoEXzHUdHxXnJTP65gYSPK5p8h9Cui3quiQQ"
 mint_authority = SolanaRuby::Keypair.load_keypair('/Users/chinaputtaiahbellamkonda/.config/solana/id.json')
-amount = 1_000_000 # Amount to mint in smallest units
+puts "Full private key: #{mint_authority[:full_private_key]}"
+puts "Private key: #{mint_authority[:private_key]}"
+puts "Public key: #{mint_authority[:public_key]}"
+amount = 1_000_000_00_00 # Amount to mint in smallest units
 multi_signers = [] # If multi-signature is used, include public keys here
 
 # Create a mint transaction
