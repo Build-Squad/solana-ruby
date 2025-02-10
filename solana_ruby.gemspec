@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'websocket-client-simple', '~> 0.8.0'
   spec.add_dependency 'base58', '~> 0.2.3'
   spec.add_dependency 'base64', '~> 0.2.0'
-  spec.add_dependency 'rbnacl', '~> 6.0'
+  spec.add_dependency 'rbnacl', '~> 7.1'
   spec.add_dependency 'ed25519'
   spec.add_development_dependency 'brakeman', '~> 6.1.2'
   spec.add_development_dependency 'rubycritic', '~> 4.9.0'
