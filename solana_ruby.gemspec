@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
     end
   end
 
+  spec.files += ['LICENSE']
   spec.files.reject! { |f| f.end_with?('.gem') }
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
