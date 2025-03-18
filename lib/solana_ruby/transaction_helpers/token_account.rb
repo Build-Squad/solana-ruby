@@ -45,7 +45,7 @@ module SolanaRuby
         nonce = 255
         loop do
           # Combine the current nonce with the seeds
-          seeds_with_nonce = seeds + [[nonce].pack('C*')]
+          seeds_with_nonce = seeds + [[nonce].pack('C')]
           hashed_buffer = hash_seeds(seeds_with_nonce, program_id)
 
           # Debugging: Log every generated address for inspection
