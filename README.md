@@ -22,40 +22,46 @@ Or install it yourself as:
 
 To start using the Solana RPC client, initialize it with or without the RPC URL. The default URL points to the Solana Mainnet. If you wish to connect to another network like Devnet or Testnet, you can specify the URL.
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
-    client = SolanaRuby::HttpClient.new()
+# Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
+client = SolanaRuby::HttpClient.new()
 
-    # Optionally, provide a custom RPC URL
-    # client = SolanaRuby::HttpClient.new("https://api.devnet.solana.com")
+# Optionally, provide a custom RPC URL
+# client = SolanaRuby::HttpClient.new("https://api.devnet.solana.com")
+```
 
 ### Fetch Solana Account Balance
 
 Once the client is initialized, you can make API calls to the Solana network. For example, to get the solana balance of a given account:
 
-    # Replace 'pubkey' with the actual public key of the solana account
+```ruby
+# Replace 'pubkey' with the actual public key of the solana account
 
-    pubkey = 'Fg6PaFpoGXkYsidMpWxTWqSKJf6KJkUxX92cnv7WMd2J'
+pubkey = 'Fg6PaFpoGXkYsidMpWxTWqSKJf6KJkUxX92cnv7WMd2J'
 
-    result = client.get_balance(pubkey)
+result = client.get_balance(pubkey)
 
-    puts result
+puts result
+```
 
 ### Fetch Parsed Account Info
 
-    # Replace 'pubkey' with the actual public key of the account
-    pubkey = 'Fg6PaFpoGXkYsidMpWxTWqSKJf6KJkUxX92cnv7WMd2J'
+```ruby
+# Replace 'pubkey' with the actual public key of the account
+pubkey = 'Fg6PaFpoGXkYsidMpWxTWqSKJf6KJkUxX92cnv7WMd2J'
 
-    # Example of options that can be passed:
-    options = {
-      commitment: 'finalized',   # Specifies the level of commitment for querying state (e.g., 'finalized', 'confirmed', 'processed')
-      encoding: 'jsonParsed'     # Specifies the encoding format (e.g., 'jsonParsed', 'base64', etc.)
-    }
+# Example of options that can be passed:
+options = {
+  commitment: 'finalized',   # Specifies the level of commitment for querying state (e.g., 'finalized', 'confirmed', 'processed')
+  encoding: 'jsonParsed'     # Specifies the encoding format (e.g., 'jsonParsed', 'base64', etc.)
+}
 
-    result = client.get_parsed_account_info(pubkey, options)
+result = client.get_parsed_account_info(pubkey, options)
 
-    puts result
+puts result
+```
 
 ### More Information on Solana Methods
 
@@ -71,15 +77,15 @@ The options parameter is a hash that can include the following fields and more, 
 
 - **commitment**: Specifies the level of commitment desired when querying state. Options include:
 
-    - 'finalized': Query the most recent block confirmed by supermajority of the cluster.
-    - 'confirmed': Query the most recent block that has been voted on by supermajority of the cluster.
-    - 'processed': Query the most recent block regardless of cluster voting.
+  - 'finalized': Query the most recent block confirmed by supermajority of the cluster.
+  - 'confirmed': Query the most recent block that has been voted on by supermajority of the cluster.
+  - 'processed': Query the most recent block regardless of cluster voting.
 
 - **encoding**: Defines the format of the returned account data. Possible values include:
 
-    - 'jsonParsed': Returns data in a JSON-parsed format.
-    - 'base64': Returns raw account data in Base64 encoding.
-    - 'base64+zstd': Returns compressed Base64 data.
+  - 'jsonParsed': Returns data in a JSON-parsed format.
+  - 'base64': Returns raw account data in Base64 encoding.
+  - 'base64+zstd': Returns compressed Base64 data.
 
 - **epoch**: Specify the epoch when querying for certain information like epoch details.
 
@@ -97,15 +103,17 @@ The filters parameter allows you to specify conditions when querying accounts an
 
 #### Token Accounts by Owner
 
-    # Replace 'owner_pubkey' with the owner's public key
-    owner_pubkey = 'Fg6PaFpoGXkYsidMpWxTWqSKJf6KJkUxX92cnv7WMd2J'
-    
-    # Query for token accounts owned by this public key
-    filters = [{ mint: 'TokenMintPublicKey' }]
-    
-    result = client.get_token_accounts_by_owner(owner_pubkey, filters)
-    
-    puts result
+```ruby
+# Replace 'owner_pubkey' with the owner's public key
+owner_pubkey = 'Fg6PaFpoGXkYsidMpWxTWqSKJf6KJkUxX92cnv7WMd2J'
+
+# Query for token accounts owned by this public key
+filters = [{ mint: 'TokenMintPublicKey' }]
+
+result = client.get_token_accounts_by_owner(owner_pubkey, filters)
+
+puts result
+```
 
 #### Account Filters
 
@@ -115,101 +123,110 @@ You can use the filters parameter to apply conditions for certain queries, such 
 
 - Filter accounts by a specific token mint.
 
-    ``filters = [{ mint: 'TokenMintPublicKey' }]``
+```ruby
+filters = [{ mint: 'TokenMintPublicKey' }]
 
-    ``result = client.get_token_accounts_by_owner(owner_pubkey, filters)``
+result = client.get_token_accounts_by_owner(owner_pubkey, filters)
+```
 
 #### Program Filter
 
 - Filter accounts associated with a particular program, such as the token program.
 
-    ``filters = [{ programId: 'TokenProgramPublicKey' }]``
+```ruby
+filters = [{ programId: 'TokenProgramPublicKey' }]
 
-    ``result = client.get_token_accounts_by_owner(owner_pubkey, filters)``
+result = client.get_token_accounts_by_owner(owner_pubkey, filters)
+```
 
 #### Data Size Filter
 
 - Filter accounts by the exact size of the account data.
 
-    ``filters = [{ dataSize: 165 }]``
+```ruby
+filters = [{ dataSize: 165 }]
 
-    ``result = client.get_program_accounts('ProgramPublicKey', filters)``
+result = client.get_program_accounts('ProgramPublicKey', filters)
+```
 
 #### Memcmp Filter
 
 - Filter by matching a specific slice of bytes at a given offset in account data.
 
-    ``filters = [{
-            memcmp: {
-                offset: 0,
-                bytes: 'Base58EncodedBytes'
-            }
-        }]``
+```ruby
+filters = [{
+  memcmp: {
+    offset: 0,
+    bytes: 'Base58EncodedBytes'
+  }
+}]
 
-    ``result = client.get_program_accounts('ProgramPublicKey', filters)``
+result = client.get_program_accounts('ProgramPublicKey', filters)
+```
 
 ## WebSocket Methods
 
 The SolanaRuby gem also provides WebSocket methods to handle real-time notifications and updates from the Solana blockchain. To use the WebSocket client:
 
-    # Initialize the WebSocket client
-    ws_client = SolanaRuby::WebSocketClient.new("wss://api.mainnet-beta.solana.com")
+```ruby
+# Initialize the WebSocket client
+ws_client = SolanaRuby::WebSocketClient.new("wss://api.mainnet-beta.solana.com")
 
-    # Subscribe to slot change notifications
-    subscription_id = ws_client.on_slot_change do |slot_info|
-      puts "Slot changed: #{slot_info}"
-    end
+# Subscribe to slot change notifications
+subscription_id = ws_client.on_slot_change do |slot_info|
+  puts "Slot changed: #{slot_info}"
+end
 
-    # Sleep to hold the process and show updates
-    sleep 60 # Adjust the duration as needed to view updates
+# Sleep to hold the process and show updates
+sleep 60 # Adjust the duration as needed to view updates
 
-    # Unsubscribe from slot change notifications
-    ws_client.remove_slot_change_listener(subscription_id)
-    puts "Unsubscribed from slot change notifications."
+# Unsubscribe from slot change notifications
+ws_client.remove_slot_change_listener(subscription_id)
+puts "Unsubscribed from slot change notifications."
+```
 
 The following methods are supported by the WebSocketClient:
 
 - **Account Change**: Subscribe to changes in an account's state.
 
-    ```ws_client.on_account_change(pubkey) { |account_info| puts account_info }```
+  `ws_client.on_account_change(pubkey) { |account_info| puts account_info }`
 
 - **Program Account Change**: Subscribe to changes in accounts owned by a specific program.
 
-    ```ws_client.on_program_account_change(program_id, filters) { |program_account_info| puts program_account_info }```
+  `ws_client.on_program_account_change(program_id, filters) { |program_account_info| puts program_account_info }`
 
 - **Logs**: Subscribe to transaction logs.
 
-    ```ws_client.on_logs { |logs_info| puts logs_info }```
+  `ws_client.on_logs { |logs_info| puts logs_info }`
 
 - **Logs for a Specific Account**: Subscribe to logs related to a specific account.
 
-    ```ws_client.on_logs_for_account(account_pubkey) { |logs_info| puts logs_info }```
+  `ws_client.on_logs_for_account(account_pubkey) { |logs_info| puts logs_info }`
 
 - **Logs for a Specific Program**: Subscribe to logs related to a specific program.
 
-    ```ws_client.on_logs_for_program(program_id) { |logs_info| puts logs_info }```
+  `ws_client.on_logs_for_program(program_id) { |logs_info| puts logs_info }`
 
 - **Root Change**: Subscribe to root changes.
 
-    ws_client.on_root_change { |root_info| puts root_info }
+  ws_client.on_root_change { |root_info| puts root_info }
 
 - **Signature**: Subscribe to a signature notification.
 
-    ```ws_client.on_signature(signature) { |signature_info| puts signature_info }```
+  `ws_client.on_signature(signature) { |signature_info| puts signature_info }`
 
 - **Slot Change**: Subscribe to slot changes.
 
-    ```ws_client.on_slot_change { |slot_info| puts slot_info }```
+  `ws_client.on_slot_change { |slot_info| puts slot_info }`
 
 - **Unsubscribe Methods**: Each WebSocket method has a corresponding unsubscribe method:
 
-    - remove_account_change_listener(subscription_id)
-    - remove_program_account_listener(subscription_id)
-    - remove_logs_listener(subscription_id)
-    - remove_root_listener(subscription_id)
-    - remove_signature_listener(subscription_id)
-    - remove_slot_change_listener(subscription_id)
-
+  - remove_account_change_listener(subscription_id)
+  - remove_program_account_listener(subscription_id)
+  - remove_logs_listener(subscription_id)
+  - remove_root_listener(subscription_id)
+  - remove_signature_listener(subscription_id)
+  - remove_slot_change_listener(subscription_id)
 
 ## Complete List of Available Methods
 
@@ -218,6 +235,7 @@ The following methods are supported by the WebSocketClient:
 The following methods are supported by the SolanaRuby::HttpClient:
 
 #### Basic
+
     get_balance(pubkey)
     get_balance_and_context(pubkey)
     get_slot()
@@ -240,6 +258,7 @@ The following methods are supported by the SolanaRuby::HttpClient:
     get_recent_prioritization_fees(addresses)
 
 #### Account
+
     get_account_info(pubkey)
     get_parsed_account_info(pubkey, options)
     get_account_info_and_context(pubkey, options)
@@ -255,6 +274,7 @@ The following methods are supported by the SolanaRuby::HttpClient:
     get_nonce(pubkey)
 
 #### Block
+
     get_nonce(pubkey)
     get_block(slot, options)
     get_block_production()
@@ -270,20 +290,24 @@ The following methods are supported by the SolanaRuby::HttpClient:
     get_block_commitment(block_slot)
 
 #### Blockhash
+
     get_latest_blockhash()
     get_latest_blockhash()
     get_fee_for_message(blockhash, options)
     is_blockhash_valid?(blockhash, options)
 
 #### Lookup Table
+
     get_address_lookup_table(pubkey)
 
 #### Signature
+
     get_signature_statuses(signatures)
     get_signature_status(signature, options)
     get_signatures_for_address(address, options)
 
 #### Slot
+
     get_slot()
     get_slot_leader(options)
     get_slot_leaders(start_slot, limit)
@@ -293,12 +317,14 @@ The following methods are supported by the SolanaRuby::HttpClient:
     get_max_shred_insert_slot()
 
 #### Token
+
     get_token_balance(pubkey, options)
     get_token_supply(pubkey)
     get_token_accounts_by_owner(owner_pubkey, filters, options)
     get_token_largest_accounts(mint_pubkey, options)
 
 #### Transaction
+
     send_transaction(signed_transaction, options)
     confirm_transaction(signature, commitment, timeout)
     get_transaction(signature, options)
@@ -347,62 +373,64 @@ To transfer SOL (the native cryptocurrency of the Solana blockchain) from one ac
 
 #### Example Usage:
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
-    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+# Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
+client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
 
-    # Fetch the recent blockhash
-    recent_blockhash = client.get_latest_blockhash["blockhash"]
+# Fetch the recent blockhash
+recent_blockhash = client.get_latest_blockhash["blockhash"]
 
-    # Generate or fetch the sender's keypair
-    # Option 1: Generate a new keypair
-    sender_keypair = SolanaRuby::Keypair.generate
-    # Option 2: Use an existing private key
-    # sender_keypair = SolanaRuby::Keypair.from_private_key("InsertPrivateKeyHere")
-    
-    sender_pubkey = sender_keypair[:public_key]
+# Generate or fetch the sender's keypair
+# Option 1: Generate a new keypair
+sender_keypair = SolanaRuby::Keypair.generate
+# Option 2: Use an existing private key
+# sender_keypair = SolanaRuby::Keypair.from_private_key("InsertPrivateKeyHere")
 
-
-    # Airdrop some lamports to the sender's account when needed.
-    lamports = 10 * 1_000_000_000
-    sleep(1)
-    result = client.request_airdrop(sender_pubkey, lamports)
-    puts "Solana Balance #{lamports} lamports added sucessfully for the public key: #{sender_pubkey}"
-    sleep(10)
+sender_pubkey = sender_keypair[:public_key]
 
 
-    # Generate or use an existing receiver's public key
-    # Option 1: Generate a new keypair for the receiver
-    receiver_keypair = SolanaRuby::Keypair.generate
-    receiver_pubkey = receiver_keypair[:public_key]
-    # Option 2: Use an existing public key
-    # receiver_pubkey = 'InsertExistingPublicKeyHere'
+# Airdrop some lamports to the sender's account when needed.
+lamports = 10 * 1_000_000_000
+sleep(1)
+result = client.request_airdrop(sender_pubkey, lamports)
+puts "Solana Balance #{lamports} lamports added sucessfully for the public key: #{sender_pubkey}"
+sleep(10)
 
-    transfer_lamports = 1 * 1_000_000
-    puts "Payer's full private key: #{sender_keypair[:full_private_key]}"
-    puts "Receiver's full private key: #{receiver_keypair[:full_private_key]}"
-    puts "Receiver's Public Key: #{receiver_keypair[:public_key]}"
 
-    # Create a new transaction
-    transaction = SolanaRuby::TransactionHelper.sol_transfer(
-      sender_pubkey,
-      receiver_pubkey,
-      transfer_lamports,
-      recent_blockhash
-    )
+# Generate or use an existing receiver's public key
+# Option 1: Generate a new keypair for the receiver
+receiver_keypair = SolanaRuby::Keypair.generate
+receiver_pubkey = receiver_keypair[:public_key]
+# Option 2: Use an existing public key
+# receiver_pubkey = 'InsertExistingPublicKeyHere'
 
-    # Get the sender's private key (ensure it's a string)
-    private_key = sender_keypair[:private_key]
-    puts "Private key type: #{private_key.class}, Value: #{private_key.inspect}"
+transfer_lamports = 1 * 1_000_000
+puts "Payer's full private key: #{sender_keypair[:full_private_key]}"
+puts "Receiver's full private key: #{receiver_keypair[:full_private_key]}"
+puts "Receiver's Public Key: #{receiver_keypair[:public_key]}"
 
-    # Sign the transaction
-    signed_transaction = transaction.sign([sender_keypair])
+# Create a new transaction
+transaction = SolanaRuby::TransactionHelper.sol_transfer(
+  sender_pubkey,
+  receiver_pubkey,
+  transfer_lamports,
+  recent_blockhash
+)
 
-    # Send the transaction to the Solana network
-    sleep(5)
-    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
-    puts "Response: #{response}"
+# Get the sender's private key (ensure it's a string)
+private_key = sender_keypair[:private_key]
+puts "Private key type: #{private_key.class}, Value: #{private_key.inspect}"
+
+# Sign the transaction
+signed_transaction = transaction.sign([sender_keypair])
+
+# Send the transaction to the Solana network
+sleep(5)
+response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+puts "Response: #{response}"
+```
 
 ### Account Creation
 
@@ -419,49 +447,51 @@ The create_account helper allows creating a new account with specified parameter
 
 #### Example Usage:
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
-    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+# Initialize the client (defaults to Mainnet(https://api.mainnet-beta.solana.com))
+client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
 
-    # Fetch the recent blockhash
-    recent_blockhash = client.get_latest_blockhash["blockhash"]
+# Fetch the recent blockhash
+recent_blockhash = client.get_latest_blockhash["blockhash"]
 
-    # Generate or fetch the sender/payer keypair
-    # Option 1: Generate a new keypair
-    sender_keypair = SolanaRuby::Keypair.generate
-    # Option 2: Use an existing private key
-    # sender_keypair = SolanaRuby::Keypair.from_private_key("InsertPrivateKeyHere")
-    sender_pubkey = sender_keypair[:public_key]
+# Generate or fetch the sender/payer keypair
+# Option 1: Generate a new keypair
+sender_keypair = SolanaRuby::Keypair.generate
+# Option 2: Use an existing private key
+# sender_keypair = SolanaRuby::Keypair.from_private_key("InsertPrivateKeyHere")
+sender_pubkey = sender_keypair[:public_key]
 
-    # Generate new account keypair 
-    new_account = SolanaRuby::Keypair.generate
-    new_account_pubkey = new_account[:public_key]
+# Generate new account keypair
+new_account = SolanaRuby::Keypair.generate
+new_account_pubkey = new_account[:public_key]
 
-    # Parameters for account creation
-    lamports = 1_000_000_000
-    space = 165
-    program_id = SolanaRuby::TransactionHelper::SYSTEM_PROGRAM_ID
+# Parameters for account creation
+lamports = 1_000_000_000
+space = 165
+program_id = SolanaRuby::TransactionHelper::SYSTEM_PROGRAM_ID
 
-    # Create the account creation transaction
-    transaction = SolanaRuby::TransactionHelper.create_account(
-      sender_pubkey,
-      new_account_pubkey,
-      lamports,
-      space,
-      recent_blockhash,
-      program_id
-    )
+# Create the account creation transaction
+transaction = SolanaRuby::TransactionHelper.create_account(
+  sender_pubkey,
+  new_account_pubkey,
+  lamports,
+  space,
+  recent_blockhash,
+  program_id
+)
 
-    # Sign with both keypairs
-    transaction.sign([sender_keypair, new_account])
+# Sign with both keypairs
+transaction.sign([sender_keypair, new_account])
 
-    # Send the transaction
-    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+# Send the transaction
+response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
 
-    # Output transaction results
-    puts "Transaction Signature: #{response}"
-    puts "New account created with Public Key: #{new_account_pubkey}"
+# Output transaction results
+puts "Transaction Signature: #{response}"
+puts "New account created with Public Key: #{new_account_pubkey}"
+```
 
 ### SPL Token Account Creation
 
@@ -476,44 +506,46 @@ The create_associated_token_account helper allows you to create an associated to
 
 #### Example Usage:
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
-    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+# Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
+client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
 
-    # Fetch the recent blockhash
-    recent_blockhash = client.get_latest_blockhash["blockhash"]
+# Fetch the recent blockhash
+recent_blockhash = client.get_latest_blockhash["blockhash"]
 
-    # Load the keypair for the payer
-    payer_keypair = SolanaRuby::Keypair.load_keypair('InsertYourJsonFilePathHere')
-    payer_pubkey = payer_keypair.public_key
+# Load the keypair for the payer
+payer_keypair = SolanaRuby::Keypair.load_keypair('InsertYourJsonFilePathHere')
+payer_pubkey = payer_keypair.public_key
 
-    # Generate or load the owner keypair
-    owner_keypair = SolanaRuby::Keypair.generate
-    owner_pubkey = owner_keypair.public_key
+# Generate or load the owner keypair
+owner_keypair = SolanaRuby::Keypair.generate
+owner_pubkey = owner_keypair.public_key
 
-    puts "Owner Public Key: #{owner_pubkey}"
-    puts "Owner Private Key: #{owner_keypair.private_key}"
+puts "Owner Public Key: #{owner_pubkey}"
+puts "Owner Private Key: #{owner_keypair.private_key}"
 
-    # Define the mint public key for the SPL token
-    mint_pubkey = "InsertMintPublicKeyHere"
+# Define the mint public key for the SPL token
+mint_pubkey = "InsertMintPublicKeyHere"
 
-    # Create the associated token account transaction
-    transaction = SolanaRuby::TransactionHelper.create_associated_token_account(
-      payer_pubkey,
-      mint_pubkey,
-      owner_pubkey,
-      recent_blockhash
-    )
+# Create the associated token account transaction
+transaction = SolanaRuby::TransactionHelper.create_associated_token_account(
+  payer_pubkey,
+  mint_pubkey,
+  owner_pubkey,
+  recent_blockhash
+)
 
-    # Sign the transaction
-    transaction.sign([payer_keypair])
+# Sign the transaction
+transaction.sign([payer_keypair])
 
-    # Send the transaction
-    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+# Send the transaction
+response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
 
-    # Output transaction results
-    puts "Transaction Signature: #{response}"
+# Output transaction results
+puts "Transaction Signature: #{response}"
+```
 
 ### Close Account
 
@@ -530,51 +562,53 @@ The close_account helper allows you to close an associated token account on the 
 
 #### Example Usage:
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
-    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+# Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
+client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
 
-    # Fetch the recent blockhash
-    recent_blockhash = client.get_latest_blockhash["blockhash"]
+# Fetch the recent blockhash
+recent_blockhash = client.get_latest_blockhash["blockhash"]
 
-    # Load the keypairs
-    payer_keypair = SolanaRuby::Keypair.from_private_key("InsertPayerPrivateKeyHere")
-    owner_keypair = SolanaRuby::Keypair.from_private_key("InsertOwnerPrivateKeyHere")
+# Load the keypairs
+payer_keypair = SolanaRuby::Keypair.from_private_key("InsertPayerPrivateKeyHere")
+owner_keypair = SolanaRuby::Keypair.from_private_key("InsertOwnerPrivateKeyHere")
 
-    payer_pubkey = payer_keypair[:public_key]
-    owner_pubkey = owner_keypair[:public_key]
+payer_pubkey = payer_keypair[:public_key]
+owner_pubkey = owner_keypair[:public_key]
 
-    # Define the associated token account to be closed and the destination account
-    account_to_close_pubkey = 'InsertAccountToClosePublicKeyHere'  # Replace with the actual account to close
-    destination_pubkey = 'InsertDestinationPublicKeyHere'  # Replace with the actual recipient address
+# Define the associated token account to be closed and the destination account
+account_to_close_pubkey = 'InsertAccountToClosePublicKeyHere'  # Replace with the actual account to close
+destination_pubkey = 'InsertDestinationPublicKeyHere'  # Replace with the actual recipient address
 
-    # Multi-signers (if required)
-    # multi_signers = [SolanaRuby::Keypair.from_private_key("InsertAdditionalSignerPrivateKeyHere")]
-    multi_signers = []
+# Multi-signers (if required)
+# multi_signers = [SolanaRuby::Keypair.from_private_key("InsertAdditionalSignerPrivateKeyHere")]
+multi_signers = []
 
-    # Extract public keys of multi-signers
-    multi_signer_pubkeys = multi_signers.map { |signer| signer[:public_key] }
+# Extract public keys of multi-signers
+multi_signer_pubkeys = multi_signers.map { |signer| signer[:public_key] }
 
-    # Create the close account transaction
-    transaction = SolanaRuby::TransactionHelper.close_account(
-      account_to_close_pubkey,
-      destination_pubkey,
-      owner_pubkey,
-      payer_pubkey,
-      multi_signer_pubkeys,
-      recent_blockhash
-    )
+# Create the close account transaction
+transaction = SolanaRuby::TransactionHelper.close_account(
+  account_to_close_pubkey,
+  destination_pubkey,
+  owner_pubkey,
+  payer_pubkey,
+  multi_signer_pubkeys,
+  recent_blockhash
+)
 
-    # Sign the transaction
-    transaction.sign([payer_keypair, owner_keypair])
+# Sign the transaction
+transaction.sign([payer_keypair, owner_keypair])
 
-    # Send the transaction
-    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+# Send the transaction
+response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
 
-    # Output transaction results
-    puts "Transaction Signature: #{response}"
-    puts "Closed account: #{account_to_close_pubkey}, funds sent to: #{destination_pubkey}"
+# Output transaction results
+puts "Transaction Signature: #{response}"
+puts "Closed account: #{account_to_close_pubkey}, funds sent to: #{destination_pubkey}"
+```
 
 ### Get Associated Token Address
 
@@ -587,19 +621,21 @@ The get_associated_token_address helper fetches the associated token account for
 
 #### Example Usage:
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Define mint address and owner public key
-    mint_address = 'InsertMintPublicKeyHere'
-    owner_pubkey = 'InsertOwnerPublicKeyHere'
+# Define mint address and owner public key
+mint_address = 'InsertMintPublicKeyHere'
+owner_pubkey = 'InsertOwnerPublicKeyHere'
 
-    # Fetch associated token address
-    associated_token_address = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(
-      mint_address,
-      owner_pubkey
-    )
+# Fetch associated token address
+associated_token_address = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(
+  mint_address,
+  owner_pubkey
+)
 
-    puts "Associated Token Address: #{associated_token_address}"
+puts "Associated Token Address: #{associated_token_address}"
+```
 
 ### Mint SPL Tokens
 
@@ -616,48 +652,50 @@ The mint_spl_tokens helper allows you to mint new SPL tokens to a specified dest
 
 #### Example Usage:
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
-    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+# Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
+client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
 
-    # Fetch the recent blockhash
-    recent_blockhash = client.get_latest_blockhash["blockhash"]
+# Fetch the recent blockhash
+recent_blockhash = client.get_latest_blockhash["blockhash"]
 
-    # Define the mint account and recipient
-    mint_account = "InsertMintPublicKeyHere"
-    destination_account = "InsertDestinationPublicKeyHere"
+# Define the mint account and recipient
+mint_account = "InsertMintPublicKeyHere"
+destination_account = "InsertDestinationPublicKeyHere"
 
-    # Load the mint authority keypair
-    mint_authority = SolanaRuby::Keypair.load_keypair('InsertYourJsonFilePathHere')
+# Load the mint authority keypair
+mint_authority = SolanaRuby::Keypair.load_keypair('InsertYourJsonFilePathHere')
 
-    puts "Mint Authority Public Key: #{mint_authority[:public_key]}"
+puts "Mint Authority Public Key: #{mint_authority[:public_key]}"
 
-    # Define the amount to mint (in smallest units)
-    amount = 1_000_000_00_00 # Adjust based on token decimals
+# Define the amount to mint (in smallest units)
+amount = 1_000_000_00_00 # Adjust based on token decimals
 
-    # Multi-signers (if required)
-    multi_signers = [] # Example: [additional_signer_pubkey]
+# Multi-signers (if required)
+multi_signers = [] # Example: [additional_signer_pubkey]
 
-    # Create the mint transaction
-    transaction = SolanaRuby::TransactionHelper.mint_spl_tokens(
-      mint_account,
-      destination_account,
-      mint_authority[:public_key],
-      amount,
-      recent_blockhash,
-      multi_signers
-    )
+# Create the mint transaction
+transaction = SolanaRuby::TransactionHelper.mint_spl_tokens(
+  mint_account,
+  destination_account,
+  mint_authority[:public_key],
+  amount,
+  recent_blockhash,
+  multi_signers
+)
 
-    # Sign the transaction with the mint authority
-    transaction.sign([mint_authority])
+# Sign the transaction with the mint authority
+transaction.sign([mint_authority])
 
-    # Send the transaction
-    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+# Send the transaction
+response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
 
-    # Output transaction results
-    puts "Transaction Signature: #{response}"
-    puts "Minted #{amount} tokens to: #{destination_account}"
+# Output transaction results
+puts "Transaction Signature: #{response}"
+puts "Minted #{amount} tokens to: #{destination_account}"
+```
 
 ### Burn SPL Tokens
 
@@ -673,42 +711,44 @@ The burn_spl_tokens helper allows you to burn (destroy) a specified amount of SP
 
 #### Example Usage:
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
-    client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
+# Initialize the Solana client (defaults to Mainnet: https://api.mainnet-beta.solana.com)
+client = SolanaRuby::HttpClient.new('https://api.devnet.solana.com')
 
-    # Fetch the recent blockhash
-    recent_blockhash = client.get_latest_blockhash["blockhash"]
+# Fetch the recent blockhash
+recent_blockhash = client.get_latest_blockhash["blockhash"]
 
-    # Define token account and mint address
-    token_account = "InsertTokenAccountPublicKeyHere"
-    mint_address = "InsertMintPublicKeyHere"
+# Define token account and mint address
+token_account = "InsertTokenAccountPublicKeyHere"
+mint_address = "InsertMintPublicKeyHere"
 
-    # Load the mint authority keypair
-    mint_authority = SolanaRuby::Keypair.load_keypair('/path/to/id.json')
-    owner = mint_authority[:public_key]
+# Load the mint authority keypair
+mint_authority = SolanaRuby::Keypair.load_keypair('/path/to/id.json')
+owner = mint_authority[:public_key]
 
-    # Define the amount to burn
-    amount = 500_000 # Tokens to burn in smallest units
+# Define the amount to burn
+amount = 500_000 # Tokens to burn in smallest units
 
-    # Create burn transaction
-    transaction = SolanaRuby::TransactionHelper.burn_spl_tokens(
-      token_account,
-      mint_address,
-      owner,
-      amount,
-      recent_blockhash
-    )
+# Create burn transaction
+transaction = SolanaRuby::TransactionHelper.burn_spl_tokens(
+  token_account,
+  mint_address,
+  owner,
+  amount,
+  recent_blockhash
+)
 
-    # Sign the transaction
-    transaction.sign([mint_authority])
+# Sign the transaction
+transaction.sign([mint_authority])
 
-    # Send the transaction
-    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+# Send the transaction
+response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
 
-    # Output transaction results
-    puts "Transaction Signature: #{response}"
+# Output transaction results
+puts "Transaction Signature: #{response}"
+```
 
 ### Transfer SPL Tokens
 
@@ -727,64 +767,64 @@ The new_spl_token_transaction helper allows you to transfer SPL tokens from one 
 
 #### Example Usage:
 
-    require 'solana_ruby'
+```ruby
+require 'solana_ruby'
 
-    # Initialize the Solana client
-    client = SolanaRuby::HttpClient.new('http://127.0.0.1:8899')
+# Initialize the Solana client
+client = SolanaRuby::HttpClient.new('http://127.0.0.1:8899')
 
-    # Fetch the recent blockhash
-    recent_blockhash = client.get_latest_blockhash["blockhash"]
+# Fetch the recent blockhash
+recent_blockhash = client.get_latest_blockhash["blockhash"]
 
-    # Load the fee payer's keypair
-    fee_payer = SolanaRuby::Keypair.from_private_key('InsertFeePayerPrivateKeyHere')
-    fee_payer_pubkey = fee_payer[:public_key]
+# Load the fee payer's keypair
+fee_payer = SolanaRuby::Keypair.from_private_key('InsertFeePayerPrivateKeyHere')
+fee_payer_pubkey = fee_payer[:public_key]
 
-    # Define the SPL token mint address
-    mint_address = 'InsertMintPublicKeyHere'
+# Define the SPL token mint address
+mint_address = 'InsertMintPublicKeyHere'
 
-    # Define sender and receiver public keys
-    sender_pubkey = 'InsertSenderPublicKeyHere'
-    receiver_pubkey = 'InsertReceiverPublicKeyHere'
+# Define sender and receiver public keys
+sender_pubkey = 'InsertSenderPublicKeyHere'
+receiver_pubkey = 'InsertReceiverPublicKeyHere'
 
-    # Fetch the associated token accounts
-    senders_token_account = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint_address, sender_pubkey)
-    receivers_token_account = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint_address, receiver_pubkey)
+# Fetch the associated token accounts
+senders_token_account = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint_address, sender_pubkey)
+receivers_token_account = SolanaRuby::TransactionHelpers::TokenAccount.get_associated_token_address(mint_address, receiver_pubkey)
 
-    puts "Sender's Token Account: #{senders_token_account}"
-    puts "Receiver's Token Account: #{receivers_token_account}"
+puts "Sender's Token Account: #{senders_token_account}"
+puts "Receiver's Token Account: #{receivers_token_account}"
 
-    # Define the transfer amount and decimals
-    transfer_lamports = 1_000_000 # Amount in smallest units
-    decimals = 9 # Adjust based on token precision
+# Define the transfer amount and decimals
+transfer_lamports = 1_000_000 # Amount in smallest units
+decimals = 9 # Adjust based on token precision
 
-    # Multi-signers (Optional, default is an empty array)
-    # multi_signers = [
-    #  SolanaRuby::Keypair.from_private_key('InsertMultiSigner1PrivateKeyHere'),
-    #  SolanaRuby::Keypair.from_private_key('InsertMultiSigner2PrivateKeyHere')
-    # ]
-    # multi_signer_pubkeys = multi_signers.map { |signer| signer[:public_key] }
-    multi_signers = []
+# Multi-signers (Optional, default is an empty array)
+# multi_signers = [
+#  SolanaRuby::Keypair.from_private_key('InsertMultiSigner1PrivateKeyHere'),
+#  SolanaRuby::Keypair.from_private_key('InsertMultiSigner2PrivateKeyHere')
+# ]
+# multi_signer_pubkeys = multi_signers.map { |signer| signer[:public_key] }
+multi_signers = []
 
-    # Create the transaction
-    transaction = SolanaRuby::TransactionHelper.new_spl_token_transaction(
-      senders_token_account,
-      mint_address,
-      receivers_token_account,
-      fee_payer_pubkey,
-      transfer_lamports,
-      decimals,
-      recent_blockhash,
-      multi_signer_pubkeys
-    )
+# Create the transaction
+transaction = SolanaRuby::TransactionHelper.new_spl_token_transaction(
+  senders_token_account,
+  mint_address,
+  receivers_token_account,
+  fee_payer_pubkey,
+  transfer_lamports,
+  decimals,
+  recent_blockhash,
+  multi_signer_pubkeys
+)
 
-    # Sign the transaction (Only fee payer, unless multi-signers are provided)
-    transaction.sign([fee_payer] + multi_signers)
+# Sign the transaction (Only fee payer, unless multi-signers are provided)
+transaction.sign([fee_payer] + multi_signers)
 
-    # Send the transaction
-    puts "Sending transaction..."
-    response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
+# Send the transaction
+puts "Sending transaction..."
+response = client.send_transaction(transaction.to_base64, { encoding: 'base64' })
 
-    # Output transaction results
-    puts "Transaction Signature: #{response}"
-
-
+# Output transaction results
+puts "Transaction Signature: #{response}"
+```
