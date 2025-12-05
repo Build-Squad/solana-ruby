@@ -65,7 +65,8 @@ module SolanaRuby
 
       def self.hash_seeds(seeds, program_id)
         # Combine seeds and program ID with the PDA derivation logic
-        buffer = seeds.flatten.join + program_id + "ProgramDerivedAddress"
+        # strict encoding to binary
+        buffer = seeds.join.b + program_id.b + "ProgramDerivedAddress".b
         RbNaCl::Hash.sha256(buffer)
       end
     end
