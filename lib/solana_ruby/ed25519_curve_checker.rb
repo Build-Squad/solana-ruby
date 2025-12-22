@@ -21,10 +21,9 @@ module SolanaRuby
       y = y_bytes.each_with_index.sum { |byte, index| byte << (8 * index) }
 
       # Reduce modulo Q (field arithmetic) to ensure it's within the valid range
-        y = y % Q
-
+      y = y % Q
       # Compute x² from the Ed25519 curve equation: x² = (y² - 1) / (d * y² + 1) mod Q
-      y_squared = y**2
+      y_squared = (y * y) % Q
       numerator   = (y_squared - 1) % Q
       denominator = (D * y_squared + 1) % Q
 
