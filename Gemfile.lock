@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    solana-ruby-web3js (2.1.3)
+    solana-ruby-web3js (2.1.5)
       activesupport
       base58 (~> 0.2.3)
       base64 (~> 0.2.0)
