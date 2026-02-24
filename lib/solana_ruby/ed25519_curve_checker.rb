@@ -10,12 +10,22 @@ module SolanaRuby
     def self.on_curve?(public_key)
       return false unless public_key.bytesize == 32  # Must be exactly 32 bytes
 
-      # Extract y-coordinate from the public key
-      y = public_key.unpack1("H*").to_i(16) % Q
+      # Extract bytes - needed for bitwise operations
+      y_bytes = public_key.bytes
+      # Ed25519 Curve does not use the x sign bit, y value is (0-254) so we need to clear the bit 255 (x sign bit)
+      # Byte 31, bit 7 is the sign bit
+      y_bytes[31] &= 0x7F # binary 01111111
 
+      # shift left bytes by 8 bits to get little-endian order then sum to get integer
+      # In little-endian: byte[0] is 2^0, byte[1] is 2^8, ..., byte[31] is 2^248
+      y = y_bytes.each_with_index.sum { |byte, index| byte << (8 * index) }
+
+      # Reduce modulo Q (field arithmetic) to ensure it's within the valid range
+      y = y % Q
       # Compute x² from the Ed25519 curve equation: x² = (y² - 1) / (d * y² + 1) mod Q
-      numerator   = (y**2 - 1) % Q
-      denominator = (D * y**2 + 1) % Q
+      y_squared = (y * y) % Q
+      numerator   = (y_squared - 1) % Q
+      denominator = (D * y_squared + 1) % Q
 
       # Compute the modular inverse of the denominator
       denominator_inv = OpenSSL::BN.new(denominator).mod_inverse(Q).to_i rescue nil
